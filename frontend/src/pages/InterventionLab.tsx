@@ -21,6 +21,8 @@ import type {
   OptimizationResult,
 } from "../services/api";
 
+import AerationTank from "../components/AerationTank";
+
 const DEMO_CONDITIONS = {
   dissolved_oxygen: 2.0,
   temperature: 20.0,
@@ -265,6 +267,26 @@ export default function InterventionLab() {
           </button>
         </section>
       </div>
+
+
+      {/* Interactive Digital Twin */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+
+        <AerationTank
+          targetDO={DEMO_CONDITIONS.dissolved_oxygen}
+          mode="monitoring"
+        />
+
+        <AerationTank
+          targetDO={targetDO}
+          relativeDemand={
+            result?.relative_aeration_demand ?? null
+          }
+          mode="intervention"
+        />
+
+      </section>
+
 
       {/* Error message */}
       {error && (

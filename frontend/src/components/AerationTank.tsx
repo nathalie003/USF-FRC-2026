@@ -1,12 +1,15 @@
 
-import { useState } from "react";
-import { Waves, Power, Cpu, Radio } from "lucide-react";
+import { useId, useState } from "react";
+import { Waves, Power, Cpu, Radio, Zap } from "lucide-react";
 
 interface AerationTankProps {
   initialActive?: boolean;
+  targetDO?: number;
+  relativeDemand?: number | null;
+  mode?: "monitoring" | "intervention";
 }
 
-const bubbles = Array.from({ length: 18 }, (_, i) => ({
+const bubbles = Array.from({ length: 36 }, (_, i) => ({
   x: 85 + (i * 23) % 235,
   y: 163 + (i % 3) * 5,
   r: 2 + (i % 4),
@@ -16,8 +19,32 @@ const bubbles = Array.from({ length: 18 }, (_, i) => ({
 
 export default function AerationTank({
   initialActive = true,
+  targetDO = 2.0,
+  relativeDemand = null,
+  mode = "monitoring",
 }: AerationTankProps) {
   const [active, setActive] = useState(initialActive);
+
+  const id = useId();
+  const waterId = `${id}-water`;
+  const sideId = `${id}-side`;
+  const glowId = `${id}-glow`;
+
+  const isIntervention = mode === "intervention";
+
+  // Animation intensity is illustrative.
+  // After evaluation, use the backend demand proxy.
+  const intensity = Math.max(
+    0.25,
+    Math.min(2, relativeDemand ?? targetDO / 2)
+  );
+
+  const bubbleCount = Math.min(
+    bubbles.length,
+    Math.round(18 * intensity)
+  );
+
+  const visibleBubbles = bubbles.slice(0, bubbleCount);
 
   return (
     <section className="panel p-6 h-full flex flex-col">
@@ -26,17 +53,21 @@ export default function AerationTank({
           <p className="text-[10px] tracking-[0.18em] text-[#22e000] mb-2">
             DIGITAL TWIN / 01
           </p>
+
           <h2 className="text-lg font-semibold text-white">
             Aeration basin
           </h2>
+
           <p className="text-xs text-neutral-500 mt-1">
-            Virtual process visualization
+            {isIntervention
+              ? "Proposed operating conditions"
+              : "Virtual process visualization"}
           </p>
         </div>
 
         <span className="flex items-center gap-1.5 text-[10px] text-neutral-400 border border-neutral-800 px-2.5 py-1.5 rounded-full">
           <Radio size={12} />
-          SIMULATED
+          {isIntervention ? "SCENARIO PREVIEW" : "SIMULATED"}
         </span>
       </div>
 
@@ -45,7 +76,7 @@ export default function AerationTank({
           className="absolute inset-0 opacity-20"
           style={{
             backgroundImage:
-              "linear-gradient(#333 1px, transparent 1px), linear-gradient(90deg, #333 1px, transparent 1px)",
+              "linear-gradient(#333 1px, transparent 1px),linear-gradient(90deg, #333 1px, transparent 1px)",
             backgroundSize: "24px 24px",
           }}
         />
@@ -57,17 +88,38 @@ export default function AerationTank({
           aria-label="Virtual wastewater aeration tank"
         >
           <defs>
-            <linearGradient id="waterFill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#22e000" stopOpacity=".22" />
-              <stop offset="100%" stopColor="#22e000" stopOpacity=".025" />
+            <linearGradient
+              id={waterId}
+              x1="0"
+              y1="0"
+              x2="0"
+              y2="1"
+            >
+              <stop
+                offset="0%"
+                stopColor="#22e000"
+                stopOpacity=".22"
+              />
+
+              <stop
+                offset="100%"
+                stopColor="#22e000"
+                stopOpacity=".025"
+              />
             </linearGradient>
 
-            <linearGradient id="tankSide" x1="0" y1="0" x2="1" y2="1">
+            <linearGradient
+              id={sideId}
+              x1="0"
+              y1="0"
+              x2="1"
+              y2="1"
+            >
               <stop offset="0%" stopColor="#222" />
               <stop offset="100%" stopColor="#111" />
             </linearGradient>
 
-            <filter id="bubbleGlow">
+            <filter id={glowId}>
               <feGaussianBlur stdDeviation="1.2" />
             </filter>
           </defs>
@@ -75,7 +127,7 @@ export default function AerationTank({
           {/* Tank walls */}
           <path
             d="M35 72 L85 40 H315 L365 72 V193 L315 225 H85 L35 193 Z"
-            fill="url(#tankSide)"
+            fill={`url(#${sideId})`}
             stroke="#555"
             strokeWidth="1.2"
           />
@@ -91,7 +143,7 @@ export default function AerationTank({
           {/* Front water volume */}
           <path
             d="M35 90 L85 122 H315 L365 90 V193 L315 225 H85 L35 193 Z"
-            fill="url(#waterFill)"
+            fill={`url(#${waterId})`}
             stroke="#365b2e"
           />
 
@@ -106,7 +158,7 @@ export default function AerationTank({
           <path
             d="M95 190 H305"
             stroke={active ? "#22e000" : "#444"}
-            strokeWidth="4"
+            strokeWidth={active ? 3 + intensity : 4}
             strokeLinecap="round"
           />
 
@@ -120,13 +172,15 @@ export default function AerationTank({
             />
           ))}
 
-          {/* Animated aeration bubbles */}
+          {/* Dynamic aeration bubbles */}
           {active &&
-            bubbles.map((b, i) => (
+            visibleBubbles.map((b, i) => (
               <g
                 key={i}
                 style={{
-                  animation: `bubble-rise ${b.duration}s ${b.delay}s infinite`,
+                  animation: `bubble-rise ${
+                    b.duration / intensity
+                  }s ${b.delay}s infinite`,
                 }}
               >
                 <circle
@@ -135,7 +189,7 @@ export default function AerationTank({
                   r={b.r + 2}
                   fill="#22e000"
                   opacity=".18"
-                  filter="url(#bubbleGlow)"
+                  filter={`url(#${glowId})`}
                 />
 
                 <circle
@@ -167,7 +221,12 @@ export default function AerationTank({
             stroke="#22e000"
           />
 
-          <circle cx="270" cy="123" r="2" fill="#22e000" />
+          <circle
+            cx="270"
+            cy="123"
+            r="2"
+            fill="#22e000"
+          />
 
           <path
             d="M270 36 H350"
@@ -182,7 +241,9 @@ export default function AerationTank({
             fill="#22e000"
             fontSize="9"
           >
-            DO SENSOR
+            {isIntervention
+              ? `DO TARGET: ${targetDO.toFixed(1)}`
+              : "DO SENSOR"}
           </text>
 
           {/* Air supply line */}
@@ -194,46 +255,92 @@ export default function AerationTank({
             strokeDasharray="5 4"
           />
 
-          <text x="135" y="242" fill="#888" fontSize="9">
+          <text
+            x="135"
+            y="242"
+            fill="#888"
+            fontSize="9"
+          >
             AIR SUPPLY
           </text>
 
-          <text x="200" y="253" fill="#555" fontSize="8" textAnchor="middle">
+          <text
+            x="200"
+            y="253"
+            fill="#555"
+            fontSize="8"
+            textAnchor="middle"
+          >
             BASIN A-01 · VIRTUAL MODEL
           </text>
         </svg>
       </div>
 
+      {/* Tank metrics */}
       <div className="grid grid-cols-2 gap-3 mt-4">
         <div className="bg-[#0c0c0c] border border-neutral-800 rounded-xl p-3">
           <div className="flex items-center gap-2 text-neutral-500 text-xs">
             <Waves size={14} />
-            Oxygen
+
+            {isIntervention
+              ? "Proposed oxygen"
+              : "Oxygen"}
           </div>
+
           <p className="text-xl font-semibold text-white mt-2">
-            2.0 <span className="text-xs text-neutral-500">mg/L</span>
+            {targetDO.toFixed(1)}
+            <span className="text-xs text-neutral-500 ml-1">
+              mg/L
+            </span>
           </p>
+
           <p className="text-[10px] text-neutral-600 mt-1">
-            Example reading
+            {isIntervention
+              ? "Operator-selected target"
+              : "Example reading"}
           </p>
         </div>
 
         <div className="bg-[#0c0c0c] border border-neutral-800 rounded-xl p-3">
           <div className="flex items-center gap-2 text-neutral-500 text-xs">
-            <Cpu size={14} />
-            Virtual pump
+            {isIntervention ? (
+              <Zap size={14} />
+            ) : (
+              <Cpu size={14} />
+            )}
+
+            {isIntervention
+              ? "Transfer capacity"
+              : "Virtual pump"}
           </div>
-          <p className={`text-xl font-semibold mt-2 ${
-            active ? "text-[#22e000]" : "text-neutral-400"
-          }`}>
-            {active ? "Active" : "Inactive"}
+
+          <p
+            className={`text-xl font-semibold mt-2 ${
+              active
+                ? "text-[#22e000]"
+                : "text-neutral-400"
+            }`}
+          >
+            {isIntervention
+              ? relativeDemand !== null
+                ? `${(relativeDemand * 100).toFixed(1)}%`
+                : "Preview"
+              : active
+                ? "Active"
+                : "Inactive"}
           </p>
+
           <p className="text-[10px] text-neutral-600 mt-1">
-            Simulation only
+            {isIntervention
+              ? relativeDemand !== null
+                ? "Relative to baseline"
+                : "Run scenario to calculate"
+              : "Simulation only"}
           </p>
         </div>
       </div>
 
+      {/* Virtual pump control */}
       <button
         type="button"
         onClick={() => setActive(!active)}
@@ -245,8 +352,20 @@ export default function AerationTank({
         }`}
       >
         <Power size={15} />
-        {active ? "Pause virtual aeration" : "Start virtual aeration"}
+
+        {active
+          ? "Pause virtual aeration"
+          : "Start virtual aeration"}
       </button>
+
+      {isIntervention && (
+        <p className="text-[10px] text-neutral-500 mt-3">
+          Illustrative animation. Bubble intensity is a
+          visualization of the proposed setting or
+          calculated transfer-capacity proxy, not actual
+          pump output or a predicted biological response.
+        </p>
+      )}
     </section>
   );
 }
