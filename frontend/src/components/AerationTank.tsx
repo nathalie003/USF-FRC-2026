@@ -55,7 +55,9 @@ export default function AerationTank({
           </p>
 
           <h2 className="text-lg font-semibold text-white">
-            Aeration basin
+          {isIntervention
+            ? "Proposed aeration basin"
+            : "Baseline aeration basin"}
           </h2>
 
           <p className="text-xs text-neutral-500 mt-1">
@@ -83,7 +85,7 @@ export default function AerationTank({
 
         <svg
           viewBox="0 0 400 260"
-          className="relative w-full max-w-[480px]"
+          className="relative w-full max-w-[400px]"
           role="img"
           aria-label="Virtual wastewater aeration tank"
         >
