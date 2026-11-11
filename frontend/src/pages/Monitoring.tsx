@@ -1,12 +1,14 @@
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Activity,
-  Thermometer,
+  Database,
   Droplets,
   FlaskConical,
-  Radio,
-  Database,
+  Thermometer,
+  ChevronLeft,
+  ChevronRight,
+  RefreshCw,
   AlertTriangle,
 } from "lucide-react";
 import {
@@ -20,78 +22,138 @@ import {
   Legend,
 } from "recharts";
 
-type Range = "30m" | "1h" | "6h";
+import {
+  fetchMonitoringHistory,
+  fetchMonitoringSummary,
+  type MonitoringObservation,
+  type MonitoringSummaryResponse,
+} from "../services/api";
 
-const demoData = Array.from({ length: 25 }, (_, i) => {
-  const minutes = i * 5;
+type WindowSize = 30 | 60 | 120 | 240;
 
-  return {
-    time: `${String(9 + Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`,
-    dissolvedOxygen: Number(
-      (2 + Math.sin(i * 0.42) * 0.24 + i * 0.006).toFixed(2)
-    ),
-    temperature: Number(
-      (20 + Math.sin(i * 0.2) * 0.55).toFixed(2)
-    ),
-    ammonia: Number(
-      (3.5 + Math.cos(i * 0.35) * 0.35).toFixed(2)
-    ),
-    n2oIndex: Number(
-      (0.3 + i * 0.012 + Math.sin(i * 0.55) * 0.08).toFixed(3)
-    ),
-  };
-});
+const WINDOWS: WindowSize[] = [30, 60, 120, 240];
 
-const metrics = [
-  {
-    label: "Dissolved oxygen",
-    value: "2.0",
-    unit: "mg/L",
-    icon: Droplets,
-    key: "dissolvedOxygen",
-  },
-  {
-    label: "Temperature",
-    value: "20.0",
-    unit: "°C",
-    icon: Thermometer,
-    key: "temperature",
-  },
-  {
-    label: "Ammonia",
-    value: "3.5",
-    unit: "mg/L",
-    icon: FlaskConical,
-    key: "ammonia",
-  },
-  {
-    label: "N₂O risk index",
-    value: "0.42",
-    unit: "demo",
-    icon: Activity,
-    key: "n2oIndex",
-  },
-] as const;
+function formatTime(value: string) {
+  return value.replace("T", " ").slice(0, 16);
+}
 
-const sensors = [
-  { name: "Dissolved oxygen", unit: "mg/L" },
-  { name: "Temperature", unit: "°C" },
-  { name: "Ammonia", unit: "mg/L" },
-  { name: "N₂O index", unit: "demo" },
-];
+function formatValue(value: number | null, digits = 2) {
+  return value === null ? "—" : value.toFixed(digits);
+}
 
 export default function Monitoring() {
-  const [range, setRange] = useState<Range>("1h");
+  const [observations, setObservations] = useState<
+    MonitoringObservation[]
+  >([]);
 
-  const visibleData =
-    range === "30m"
-      ? demoData.slice(-7)
-      : range === "1h"
-        ? demoData.slice(-13)
-        : demoData;
+  const [summary, setSummary] =
+    useState<MonitoringSummaryResponse | null>(null);
+
+  const [offset, setOffset] = useState(0);
+  const [windowSize, setWindowSize] = useState<WindowSize>(120);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    fetchMonitoringSummary()
+      .then((data) => {
+        if (!cancelled) setSummary(data);
+      })
+      .catch((err: unknown) => {
+        if (!cancelled) {
+          setError(
+            err instanceof Error ? err.message : "Summary unavailable."
+          );
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [refreshKey]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    setLoading(true);
+    setError(null);
+
+    fetchMonitoringHistory(offset, windowSize)
+      .then((data) => {
+        if (!cancelled) {
+          setObservations(data.observations);
+        }
+      })
+      .catch((err: unknown) => {
+        if (!cancelled) {
+          setError(
+            err instanceof Error
+              ? err.message
+              : "Unable to load historical observations."
+          );
+          setObservations([]);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [offset, windowSize, refreshKey]);
+
+  const latest = observations.at(-1) ?? null;
+
+  const metrics = [
+    {
+      label: "Dissolved oxygen",
+      value: formatValue(latest?.dissolved_oxygen ?? null),
+      icon: Droplets,
+      color: "#22e000",
+    },
+    {
+      label: "Temperature",
+      value: formatValue(latest?.temperature ?? null),
+      icon: Thermometer,
+      color: "#a8f08a",
+    },
+    {
+      label: "Ammonium (NH₄)",
+      value: formatValue(latest?.ammonium ?? null),
+      icon: FlaskConical,
+      color: "#8bc5ff",
+    },
+    {
+      label: "N₂O emission rate",
+      value: formatValue(latest?.n2o_emission_rate ?? null),
+      icon: Activity,
+      color: "#ffb454",
+    },
+  ];
+
+  const total = summary?.total_observations ?? 0;
+  const canGoBack = offset > 0;
+  const canGoForward = total > 0 && offset + windowSize < total;
+
+  const firstVisible = observations[0]?.time;
+  const lastVisible = latest?.time;
+
+  const chartData = observations.map((row) => ({
+    ...row,
+    label: row.time.replace("T", " ").slice(5, 16),
+  }));
+
+  const moveWindow = (direction: -1 | 1) => {
+    const next = offset + direction * windowSize;
+    setOffset(Math.max(0, Math.min(next, Math.max(0, total - 1))));
+  };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-8">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-xs tracking-[0.25em] text-[#22e000] uppercase mb-2">
@@ -103,58 +165,80 @@ export default function Monitoring() {
           </h1>
 
           <p className="text-[#969696] mt-2">
-            Understand process conditions and emerging
-            emissions risks.
+            Explore recorded wastewater conditions and
+            historical N₂O emissions.
           </p>
         </div>
 
         <span className="flex items-center gap-2 border border-[#333] rounded-full px-4 py-2 text-xs text-[#969696]">
           <Database size={14} />
-          ILLUSTRATIVE DATA
+          HISTORICAL DATA
         </span>
       </header>
+
+      <section className="panel p-5">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <p className="text-xs text-[#969696] mb-1">
+              Historical dataset
+            </p>
+
+            <p className="text-lg font-semibold">
+              {summary
+                ? `${summary.total_observations.toLocaleString()} observations`
+                : "Loading dataset..."}
+            </p>
+
+            <p className="text-xs text-[#777] mt-1">
+              {summary
+                ? `${formatTime(summary.first_timestamp)} — ${formatTime(summary.last_timestamp)}`
+                : "Checking data coverage"}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setRefreshKey((value) => value + 1)}
+            className="flex items-center gap-2 rounded-lg border border-[#333] px-4 py-2 text-sm hover:border-[#22e000] transition-colors"
+          >
+            <RefreshCw size={15} />
+            Refresh
+          </button>
+        </div>
+      </section>
+
+      {error && (
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300">
+          {error}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         {metrics.map((metric) => {
           const Icon = metric.icon;
 
           return (
-            <div key={metric.key} className="panel p-5">
+            <div key={metric.label} className="panel p-5">
               <div className="flex items-center justify-between">
                 <p className="text-sm text-[#969696]">
                   {metric.label}
                 </p>
 
-                <Icon size={17} className="text-[#22e000]" />
+                <Icon size={18} style={{ color: metric.color }} />
               </div>
 
-              <div className="mt-5 flex items-baseline gap-2">
+              <div className="mt-5">
                 <span className="text-3xl font-semibold">
-                  {metric.value}
-                </span>
-
-                <span className="text-xs text-[#969696]">
-                  {metric.unit}
+                  {loading ? "..." : metric.value}
                 </span>
               </div>
 
-              <div className="mt-4 h-12">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={demoData}>
-                    <Line
-                      type="monotone"
-                      dataKey={metric.key}
-                      stroke="#22e000"
-                      strokeWidth={2}
-                      dot={false}
-                      isAnimationActive={false}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
+              <p className="text-xs text-[#777] mt-3">
+                Latest value in selected window
+              </p>
 
-              <p className="text-[11px] text-[#777] mt-2">
-                Sample historical trend
+              <p className="text-[11px] text-[#777] mt-1">
+                Units not verified
               </p>
             </div>
           );
@@ -165,41 +249,74 @@ export default function Monitoring() {
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
           <div>
             <p className="text-[10px] tracking-widest text-[#22e000] mb-2">
-              PROCESS ANALYTICS
+              HISTORICAL REPLAY
             </p>
 
             <h2 className="text-xl font-semibold">
-              Historical process trends
+              Process conditions
             </h2>
 
             <p className="text-sm text-[#969696] mt-1">
-              Explore example wastewater process readings.
+              Navigate through recorded observations.
             </p>
           </div>
 
-          <div className="flex gap-1 bg-[#080808] border border-[#252525] rounded-lg p-1">
-            {(["30m", "1h", "6h"] as Range[]).map((option) => (
+          <div className="flex flex-wrap gap-2">
+            {WINDOWS.map((size) => (
               <button
-                key={option}
+                key={size}
                 type="button"
-                onClick={() => setRange(option)}
-                className={`px-4 py-2 rounded-md text-xs transition-colors ${
-                  range === option
-                    ? "bg-[#22e000] text-black font-semibold"
-                    : "text-[#969696] hover:text-white"
+                onClick={() => {
+                  setWindowSize(size);
+                  setOffset(0);
+                }}
+                className={`px-3 py-2 rounded-lg text-xs border transition-colors ${
+                  windowSize === size
+                    ? "bg-[#22e000] border-[#22e000] text-black font-semibold"
+                    : "border-[#333] text-[#969696] hover:text-white"
                 }`}
               >
-                {option}
+                {size} readings
               </button>
             ))}
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
+          <p className="text-xs text-[#969696]">
+            {firstVisible && lastVisible
+              ? `${formatTime(firstVisible)} → ${formatTime(lastVisible)}`
+              : "No observations selected"}
+          </p>
+
+          <div className="flex gap-2">
+            <button
+              type="button"
+              disabled={!canGoBack || loading}
+              onClick={() => moveWindow(-1)}
+              className="flex items-center gap-1 rounded-lg border border-[#333] px-3 py-2 text-xs disabled:opacity-30 hover:border-[#22e000]"
+            >
+              <ChevronLeft size={14} />
+              Previous
+            </button>
+
+            <button
+              type="button"
+              disabled={!canGoForward || loading}
+              onClick={() => moveWindow(1)}
+              className="flex items-center gap-1 rounded-lg border border-[#333] px-3 py-2 text-xs disabled:opacity-30 hover:border-[#22e000]"
+            >
+              Next
+              <ChevronRight size={14} />
+            </button>
           </div>
         </div>
 
         <div className="h-[320px]">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
-              data={visibleData}
-              margin={{ top: 12, right: 18, left: 0, bottom: 5 }}
+              data={chartData}
+              margin={{ top: 12, right: 16, left: 0, bottom: 8 }}
             >
               <CartesianGrid
                 stroke="#252525"
@@ -208,44 +325,19 @@ export default function Monitoring() {
               />
 
               <XAxis
-                dataKey="time"
+                dataKey="label"
                 stroke="#777"
                 tickLine={false}
                 axisLine={false}
-                fontSize={11}
+                fontSize={10}
+                minTickGap={30}
               />
 
               <YAxis
-                yAxisId="process"
-                stroke="#22e000"
+                stroke="#969696"
                 tickLine={false}
                 axisLine={false}
                 fontSize={11}
-                domain={[0, 5]}
-                label={{
-                  value: "DO / Ammonia (mg/L)",
-                  angle: -90,
-                  position: "insideLeft",
-                  fill: "#969696",
-                  fontSize: 10,
-                }}
-              />
-
-              <YAxis
-                yAxisId="risk"
-                orientation="right"
-                stroke="#ffb454"
-                tickLine={false}
-                axisLine={false}
-                fontSize={11}
-                domain={[0, 1]}
-                label={{
-                  value: "N₂O index",
-                  angle: 90,
-                  position: "insideRight",
-                  fill: "#969696",
-                  fontSize: 10,
-                }}
               />
 
               <Tooltip
@@ -260,32 +352,35 @@ export default function Monitoring() {
               <Legend />
 
               <Line
-                yAxisId="process"
-                dataKey="dissolvedOxygen"
-                name="Dissolved oxygen (mg/L)"
+                type="monotone"
+                dataKey="dissolved_oxygen"
+                name="Dissolved oxygen"
                 stroke="#22e000"
                 strokeWidth={2.5}
                 dot={false}
+                connectNulls={false}
                 isAnimationActive={false}
               />
 
               <Line
-                yAxisId="process"
-                dataKey="ammonia"
-                name="Ammonia (mg/L)"
+                type="monotone"
+                dataKey="ammonium"
+                name="Ammonium"
+                stroke="#8bc5ff"
+                strokeWidth={2}
+                dot={false}
+                connectNulls={false}
+                isAnimationActive={false}
+              />
+
+              <Line
+                type="monotone"
+                dataKey="nitrate"
+                name="Nitrate"
                 stroke="#b2ff9d"
                 strokeWidth={2}
                 dot={false}
-                isAnimationActive={false}
-              />
-
-              <Line
-                yAxisId="risk"
-                dataKey="n2oIndex"
-                name="N₂O index (demo)"
-                stroke="#ffb454"
-                strokeWidth={2}
-                dot={false}
+                connectNulls={false}
                 isAnimationActive={false}
               />
             </LineChart>
@@ -293,85 +388,107 @@ export default function Monitoring() {
         </div>
 
         <p className="text-xs text-[#777] mt-4">
-          Synthetic demonstration readings. N₂O index is
-          dimensionless and does not represent measured
-          emissions or a validated risk probability.
+          Recorded historical values. Measurement units have
+          not yet been verified from the original dataset.
         </p>
       </section>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <section className="panel p-6">
-          <div className="flex items-center gap-3 mb-5">
-            <Radio size={19} className="text-[#22e000]" />
+      <section className="panel p-6">
+        <div className="mb-6">
+          <p className="text-[10px] tracking-widest text-[#ffb454] mb-2">
+            N₂O ANALYTICS
+          </p>
 
-            <h2 className="text-lg font-semibold">
-              Sensor network
-            </h2>
-          </div>
+          <h2 className="text-xl font-semibold">
+            Recorded N₂O emission rate
+          </h2>
 
-          <div className="space-y-4">
-            {sensors.map((sensor) => (
-              <div
-                key={sensor.name}
-                className="flex justify-between items-center border-b border-[#252525] pb-3"
-              >
-                <div>
-                  <p className="text-sm">{sensor.name}</p>
-                  <p className="text-xs text-[#777] mt-1">
-                    Unit: {sensor.unit}
-                  </p>
-                </div>
+          <p className="text-sm text-[#969696] mt-1">
+            Historical emissions signal for the selected window.
+          </p>
+        </div>
 
-                <span className="text-xs text-[#ffb454]">
-                  DEMO SOURCE
-                </span>
-              </div>
-            ))}
-          </div>
-        </section>
+        <div className="h-[280px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart
+              data={chartData}
+              margin={{ top: 12, right: 16, left: 0, bottom: 8 }}
+            >
+              <CartesianGrid
+                stroke="#252525"
+                strokeDasharray="3 5"
+                vertical={false}
+              />
 
-        <section className="panel p-6">
-          <div className="flex items-center gap-3 mb-5">
-            <AlertTriangle
-              size={19}
-              className="text-[#ffb454]"
-            />
+              <XAxis
+                dataKey="label"
+                stroke="#777"
+                tickLine={false}
+                axisLine={false}
+                fontSize={10}
+                minTickGap={30}
+              />
 
-            <h2 className="text-lg font-semibold">
-              Monitoring insights
-            </h2>
-          </div>
+              <YAxis
+                stroke="#969696"
+                tickLine={false}
+                axisLine={false}
+                fontSize={11}
+              />
 
-          <div className="rounded-xl border border-[#ffb454]/20 bg-[#ffb454]/5 p-4">
-            <p className="text-sm font-medium text-[#ffb454]">
-              Illustrative elevated N₂O trend
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "#121212",
+                  border: "1px solid #333",
+                  borderRadius: 12,
+                  color: "#fff",
+                }}
+              />
+
+              <Line
+                type="monotone"
+                dataKey="n2o_emission_rate"
+                name="Recorded N₂O emission rate"
+                stroke="#ffb454"
+                strokeWidth={2.5}
+                dot={false}
+                connectNulls={false}
+                isAnimationActive={false}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+
+        <p className="text-xs text-[#777] mt-4">
+          Emission-rate units and calibration are not yet
+          verified. This chart does not represent a model
+          prediction or a validated intervention outcome.
+        </p>
+      </section>
+
+      <section className="panel p-5">
+        <div className="flex gap-3">
+          <AlertTriangle
+            size={20}
+            className="text-[#ffb454] shrink-0"
+          />
+
+          <div>
+            <h3 className="font-semibold text-sm">
+              Research dataset limitations
+            </h3>
+
+            <p className="text-sm text-[#969696] mt-2 leading-relaxed">
+              These readings are historical observations,
+              not live sensor data. Measurement units and
+              sensor calibration remain unverified. The
+              dataset supports forecasting research but
+              does not establish how N₂O emissions respond
+              to changes in aeration.
             </p>
-
-            <p className="text-sm text-[#969696] mt-2">
-              The sample data demonstrates how Guardian
-              could highlight changing N₂O conditions
-              alongside dissolved oxygen and ammonia.
-            </p>
           </div>
-
-          <div className="mt-4 rounded-xl border border-[#252525] p-4">
-            <p className="text-sm font-medium">
-              Forecast integration
-            </p>
-
-            <p className="text-sm text-[#969696] mt-2">
-              Historical readings are currently synthetic.
-              Forecasting and live sensor connections are
-              not yet available.
-            </p>
-          </div>
-        </section>
-      </div>
-
-      <p className="text-xs text-[#777] pb-4">
-        Guardian research prototype · Synthetic telemetry ·
-        No live plant sensors connected
-      </p>
+        </div>
+      </section>
     </div>
   );
 }

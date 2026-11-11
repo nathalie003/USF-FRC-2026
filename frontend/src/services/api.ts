@@ -74,3 +74,98 @@ export function optimizeInterventions(
     data
   );
 }
+
+export interface MonitoringObservation {
+  time: string;
+  influent_flowrate: number | null;
+  dissolved_oxygen: number | null;
+  ammonium: number | null;
+  nitrate: number | null;
+  n2o: number | null;
+  temperature: number | null;
+  n2o_emission_rate: number | null;
+}
+
+export interface MonitoringHistoryResponse {
+  source: string;
+  live: boolean;
+  units_verified: boolean;
+  total: number;
+  offset: number;
+  count: number;
+  observations: MonitoringObservation[];
+}
+
+export interface MonitoringSummaryResponse {
+  source: string;
+  live: boolean;
+  units_verified: boolean;
+  total_observations: number;
+  first_timestamp: string;
+  last_timestamp: string;
+  available_variables: string[];
+  notes: string[];
+}
+
+export async function fetchMonitoringHistory(
+  offset = 0,
+  limit = 120
+): Promise<MonitoringHistoryResponse> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/monitoring/history?offset=${offset}&limit=${limit}`
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to load monitoring history (${response.status})`
+    );
+  }
+
+  return response.json();
+}
+
+export async function fetchMonitoringSummary(): Promise<MonitoringSummaryResponse> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/monitoring/summary`
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to load monitoring summary (${response.status})`
+    );
+  }
+
+  return response.json();
+}
+
+export interface MonitoringObservation {
+  time: string;
+  influent_flowrate: number | null;
+  dissolved_oxygen: number | null;
+  ammonium: number | null;
+  nitrate: number | null;
+  n2o: number | null;
+  temperature: number | null;
+  n2o_emission_rate: number | null;
+}
+
+export interface MonitoringHistoryResponse {
+  source: string;
+  live: boolean;
+  units_verified: boolean;
+  total: number;
+  offset: number;
+  count: number;
+  observations: MonitoringObservation[];
+}
+
+export interface MonitoringSummaryResponse {
+  source: string;
+  live: boolean;
+  units_verified: boolean;
+  total_observations: number;
+  first_timestamp: string;
+  last_timestamp: string;
+  available_variables: string[];
+  notes: string[];
+}
