@@ -1,0 +1,33 @@
+{
+  "raw_rows": 74172,
+  "raw_missing_numeric": {
+    "Influent flowrate": 1,
+    "DO": 0,
+    "NH4": 0,
+    "NO3": 0,
+    "N2O": 0,
+    "Temperature": 0,
+    "N2O emission rate": 0
+  },
+  "negative_values": {
+    "Influent flowrate": 2851,
+    "DO": 0,
+    "NH4": 0,
+    "NO3": 0,
+    "N2O": 0,
+    "Temperature": 0,
+    "N2O emission rate": 0
+  },
+  "timestamp_gaps_over_5min": 6,
+  "purged_boundary_rows": 12,
+  "train_rows": 47698,
+  "train_first_time": "2018-06-14 08:00:00",
+  "train_last_time": "2018-12-15 14:30:00",
+  "validation_rows": 10216,
+  "validation_first_time": "2018-12-15 15:05:00",
+  "validation_last_time": "2019-01-22 21:35:00",
+  "test_rows": 10223,
+  "test_first_time": "2019-01-22 22:10:00",
+  "test_last_time": "2019-02-28 23:30:00",
+  "usable_feature_rows": 68149
+}
