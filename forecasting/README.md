@@ -3,15 +3,15 @@
 Forecasts the **N2O emission rate** 30 minutes ahead (units: "reported units").
 Run everything from the repo root. Data files live in `data/`.
 
-    pip install -r ai/requirements-ai.txt
+    pip install -r forecasting/requirements.txt
     python -m ai.train          # tunes on validation, saves models/ (never touches test)
     python -m ai.evaluation     # ONE-TIME test evaluation -> reports/ (use --force to repeat)
-    python -m pytest ai/test_predict_parity.py -q
+    python -m pytest forecasting/test_predict_parity.py -q
     python -m ai.predict        # demo forecast
 
 Dashboard use:
 
-    from ai.predict import predict
+    from forecasting.predict import predict
     result = predict(window_df)   # 7 rows, 5 min apart: Time + 7 sensor columns
 
 Returns forecast, forecast_time, risk_level (normal / watch / high_risk), cutoffs,

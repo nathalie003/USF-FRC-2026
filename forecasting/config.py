@@ -6,7 +6,7 @@ evaluation and prediction code can never disagree with each other.
 from pathlib import Path
 
 # ---------------------------------------------------------------- folders
-ROOT = Path(__file__).resolve().parents[1]      # repo root (one level above ai/)
+ROOT = Path(__file__).resolve().parents[1]      # repo root (one level above forecasting/)
 DATA_DIR = ROOT / "data"
 MODELS_DIR = ROOT / "models"
 REPORTS_DIR = ROOT / "reports"
