@@ -1,0 +1,260 @@
+{
+  "spike_threshold": 0.53,
+  "cutoffs": {
+    "watch": 0.18686562776565552,
+    "high_risk": 0.37967509031295776
+  },
+  "units": "reported units",
+  "target": "N\u2082O emission rate",
+  "validation": {
+    "rows": 10216,
+    "real_spikes": 564,
+    "real_spike_share": 0.05520751761942052,
+    "model": {
+      "MAE": 0.08955029356056904,
+      "RMSE": 0.24881801221786107
+    },
+    "persistence_baseline": {
+      "MAE": 0.11707223962411903,
+      "RMSE": 0.32511035112282166
+    },
+    "spike_PR_AUC": {
+      "model": 0.7263392923284465,
+      "persistence_baseline": 0.5960147274179751
+    },
+    "alerts_watch": {
+      "cutoff": 0.18686562776565552,
+      "model": {
+        "alerts": 1266,
+        "spikes_caught": 508,
+        "spikes_missed": 56,
+        "false_alarms": 758,
+        "precision": 0.40126382306477093,
+        "recall": 0.900709219858156,
+        "F1": 0.5551912568306011
+      },
+      "persistence_baseline": {
+        "alerts": 2011,
+        "spikes_caught": 508,
+        "spikes_missed": 56,
+        "false_alarms": 1503,
+        "precision": 0.25261064147190454,
+        "recall": 0.900709219858156,
+        "F1": 0.3945631067961165
+      }
+    },
+    "alerts_high_risk": {
+      "cutoff": 0.37967509031295776,
+      "model": {
+        "alerts": 526,
+        "spikes_caught": 369,
+        "spikes_missed": 195,
+        "false_alarms": 157,
+        "precision": 0.7015209125475285,
+        "recall": 0.6542553191489362,
+        "F1": 0.6770642201834861
+      },
+      "persistence_baseline": {
+        "alerts": 966,
+        "spikes_caught": 439,
+        "spikes_missed": 125,
+        "false_alarms": 527,
+        "precision": 0.45445134575569357,
+        "recall": 0.7783687943262412,
+        "F1": 0.5738562091503268
+      }
+    }
+  },
+  "test": {
+    "rows": 10223,
+    "real_spikes": 1586,
+    "real_spike_share": 0.1551403697544752,
+    "model": {
+      "MAE": 0.19859933686374986,
+      "RMSE": 0.40747459413050224
+    },
+    "persistence_baseline": {
+      "MAE": 0.24935341876161599,
+      "RMSE": 0.42734152229807393
+    },
+    "spike_PR_AUC": {
+      "model": 0.584613392156653,
+      "persistence_baseline": 0.4414347757321281
+    },
+    "alerts_watch": {
+      "cutoff": 0.18686562776565552,
+      "model": {
+        "alerts": 3673,
+        "spikes_caught": 1313,
+        "spikes_missed": 273,
+        "false_alarms": 2360,
+        "precision": 0.35747345494146476,
+        "recall": 0.8278688524590164,
+        "F1": 0.4993344742346454
+      },
+      "persistence_baseline": {
+        "alerts": 4130,
+        "spikes_caught": 1171,
+        "spikes_missed": 415,
+        "false_alarms": 2959,
+        "precision": 0.28353510895883777,
+        "recall": 0.7383354350567465,
+        "F1": 0.4097270818754374
+      }
+    },
+    "alerts_high_risk": {
+      "cutoff": 0.37967509031295776,
+      "model": {
+        "alerts": 1408,
+        "spikes_caught": 844,
+        "spikes_missed": 742,
+        "false_alarms": 564,
+        "precision": 0.5994318181818182,
+        "recall": 0.532156368221942,
+        "F1": 0.5637942551770208
+      },
+      "persistence_baseline": {
+        "alerts": 2388,
+        "spikes_caught": 898,
+        "spikes_missed": 688,
+        "false_alarms": 1490,
+        "precision": 0.3760469011725293,
+        "recall": 0.5662042875157629,
+        "F1": 0.45193759436336184
+      }
+    }
+  },
+  "ablation_without_n2o_inputs": {
+    "cutoffs": {
+      "watch": 0.0991651639342308,
+      "high_risk": 0.1439170241355896
+    },
+    "validation": {
+      "rows": 10216,
+      "real_spikes": 564,
+      "real_spike_share": 0.05520751761942052,
+      "model": {
+        "MAE": 0.14300607823780626,
+        "RMSE": 0.3405209282850034
+      },
+      "persistence_baseline": {
+        "MAE": 0.11707223962411903,
+        "RMSE": 0.32511035112282166
+      },
+      "spike_PR_AUC": {
+        "model": 0.13606171050700067,
+        "persistence_baseline": 0.5960147274179751
+      },
+      "alerts_watch": {
+        "cutoff": 0.0991651639342308,
+        "model": {
+          "alerts": 7263,
+          "spikes_caught": 512,
+          "spikes_missed": 52,
+          "false_alarms": 6751,
+          "precision": 0.070494286107669,
+          "recall": 0.9078014184397163,
+          "F1": 0.13082918103998975
+        },
+        "persistence_baseline": {
+          "alerts": 3162,
+          "spikes_caught": 540,
+          "spikes_missed": 24,
+          "false_alarms": 2622,
+          "precision": 0.17077798861480076,
+          "recall": 0.9574468085106383,
+          "F1": 0.2898550724637681
+        }
+      },
+      "alerts_high_risk": {
+        "cutoff": 0.1439170241355896,
+        "model": {
+          "alerts": 371,
+          "spikes_caught": 97,
+          "spikes_missed": 467,
+          "false_alarms": 274,
+          "precision": 0.261455525606469,
+          "recall": 0.17198581560283688,
+          "F1": 0.20748663101604278
+        },
+        "persistence_baseline": {
+          "alerts": 2432,
+          "spikes_caught": 517,
+          "spikes_missed": 47,
+          "false_alarms": 1915,
+          "precision": 0.21258223684210525,
+          "recall": 0.9166666666666666,
+          "F1": 0.3451268357810414
+        }
+      }
+    },
+    "test": {
+      "rows": 10223,
+      "real_spikes": 1586,
+      "real_spike_share": 0.1551403697544752,
+      "model": {
+        "MAE": 0.25065659744024954,
+        "RMSE": 0.5652156967241596
+      },
+      "persistence_baseline": {
+        "MAE": 0.24935341876161599,
+        "RMSE": 0.42734152229807393
+      },
+      "spike_PR_AUC": {
+        "model": 0.2465078036112715,
+        "persistence_baseline": 0.4414347757321281
+      },
+      "alerts_watch": {
+        "cutoff": 0.0991651639342308,
+        "model": {
+          "alerts": 8536,
+          "spikes_caught": 1438,
+          "spikes_missed": 148,
+          "false_alarms": 7098,
+          "precision": 0.16846298031865042,
+          "recall": 0.9066834804539723,
+          "F1": 0.2841335704406244
+        },
+        "persistence_baseline": {
+          "alerts": 5420,
+          "spikes_caught": 1298,
+          "spikes_missed": 288,
+          "false_alarms": 4122,
+          "precision": 0.23948339483394834,
+          "recall": 0.8184110970996217,
+          "F1": 0.3705395375392521
+        }
+      },
+      "alerts_high_risk": {
+        "cutoff": 0.1439170241355896,
+        "model": {
+          "alerts": 294,
+          "spikes_caught": 85,
+          "spikes_missed": 1501,
+          "false_alarms": 209,
+          "precision": 0.2891156462585034,
+          "recall": 0.053593947036569986,
+          "F1": 0.09042553191489361
+        },
+        "persistence_baseline": {
+          "alerts": 4641,
+          "spikes_caught": 1233,
+          "spikes_missed": 353,
+          "false_alarms": 3408,
+          "precision": 0.2656755009696186,
+          "recall": 0.7774274905422447,
+          "F1": 0.39601734382527704
+        }
+      }
+    }
+  },
+  "sensor_importance_validation": {
+    "N2O emission rate": 0.11923719942569733,
+    "N2O": 0.061744917184114456,
+    "NH4": 0.044728122651576996,
+    "DO": 0.0333372987806797,
+    "NO3": 0.020638015121221542,
+    "Temperature": 0.009377758018672466,
+    "Influent flowrate": 0.0051558976992964745
+  }
+}
