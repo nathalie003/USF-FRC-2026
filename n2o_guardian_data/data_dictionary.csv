@@ -1,0 +1,10 @@
+column,meaning,units,notes
+Time,Observation timestamp,unknown,Parsed from source as local naive timestamp
+Influent flowrate,Incoming wastewater flow,unknown,Negative values flagged missing pending sensor convention verification
+DO,Dissolved oxygen,unknown,Input feature
+NH4,Ammonium measurement,unknown,Input feature
+NO3,Nitrate measurement,unknown,Input feature
+N2O,Nitrous oxide measurement,unknown,Input feature
+Temperature,Temperature,unknown,Input feature
+N2O emission rate,Nitrous oxide emission rate at current time,unknown,Potential input if real-time reading available
+target_emission_rate_30m,N2O emission rate exactly 30 minutes later,same as source,Prediction target
