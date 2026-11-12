@@ -10,7 +10,7 @@ router = APIRouter(prefix="/api/monitoring", tags=["Monitoring"])
 
 DATA_PATH = (
     Path(__file__).resolve().parents[2]
-    / "n2o_guardian_data"
+    / "data"
     / "cleaned_data.csv"
 )
 

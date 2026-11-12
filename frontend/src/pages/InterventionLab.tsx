@@ -1,5 +1,5 @@
+import { useEffect, useState } from "react";
 
-import { useState } from "react";
 import {
   ArrowUpRight,
   SlidersHorizontal,
@@ -14,11 +14,15 @@ import {
 import {
   simulateIntervention,
   optimizeInterventions,
+  fetchLatestForecast,
+  fetchMonitoringHistory,
 } from "../services/api";
 
 import type {
   ScenarioResult,
   OptimizationResult,
+  ForecastResponse,
+  PlantConditions,
 } from "../services/api";
 
 import AerationTank from "../components/AerationTank";
@@ -42,6 +46,75 @@ export default function InterventionLab() {
   const [optimizing, setOptimizing] = useState(false);
   const [error, setError] = useState("");
 
+
+const [forecast, setForecast] =
+  useState<ForecastResponse | null>(null);
+
+const [plantConditions, setPlantConditions] =
+  useState<PlantConditions | null>(null);
+
+const [dataLoading, setDataLoading] = useState(true);
+const [dataError, setDataError] = useState("");
+
+useEffect(() => {
+  let active = true;
+
+  async function loadPlantConditions() {
+    try {
+      const [forecastResult, historyResult] = await Promise.all([
+        fetchLatestForecast(),
+        fetchMonitoringHistory(74171, 1),
+      ]);
+
+      if (!active) return;
+
+      const observation = historyResult.observations[0];
+
+      if (
+        !observation ||
+        observation.dissolved_oxygen === null ||
+        observation.temperature === null ||
+        observation.ammonium === null
+      ) {
+        throw new Error("Required historical sensor readings are unavailable.");
+      }
+
+      const conditions: PlantConditions = {
+        dissolved_oxygen: observation.dissolved_oxygen,
+        temperature: observation.temperature,
+        ammonia: observation.ammonium,
+        n2o_forecast: forecastResult.forecast,
+      };
+
+      setForecast(forecastResult);
+      setPlantConditions(conditions);
+      setTargetDO(
+        Math.min(4, Math.max(0.5, conditions.dissolved_oxygen))
+      );
+      setDataError("");
+    } catch (err) {
+      if (!active) return;
+
+      setDataError(
+        err instanceof Error
+          ? err.message
+          : "Unable to load historical model inputs."
+      );
+    } finally {
+      if (active) setDataLoading(false);
+    }
+  }
+
+  loadPlantConditions();
+
+  return () => {
+    active = false;
+  };
+}, []);
+
+const conditions = plantConditions ?? DEMO_CONDITIONS;
+
+
   async function runSimulation() {
     setLoading(true);
     setError("");
@@ -49,7 +122,7 @@ export default function InterventionLab() {
 
     try {
       const data = await simulateIntervention({
-        ...DEMO_CONDITIONS,
+        ...conditions,
         proposed_do: targetDO,
       });
 
@@ -111,28 +184,45 @@ export default function InterventionLab() {
         </div>
       </header>
 
-      {/* Forecast alert */}
-      <div className="panel p-5 flex items-start gap-4">
-        <div className="rounded-xl bg-[#ffb454]/10 p-3 text-[#ffb454]">
-          <AlertTriangle size={22} />
-        </div>
+      
+{/* Forecast alert */}
+<div className="panel p-5 flex items-start gap-4">
+  <div className="rounded-xl bg-[#22e000]/10 p-3 text-[#22e000]">
+    <AlertTriangle size={22} />
+  </div>
 
-        <div>
-          <p className="text-sm font-medium text-[#ffb454]">
-            Illustrative forecast alert
-          </p>
+  <div>
+    <p className="text-sm font-medium text-[#22e000]">
+      {forecast
+        ? `AI forecast: ${forecast.risk_level.replace("_", " ")}`
+        : "Loading historical forecast"}
+    </p>
 
-          <p className="text-lg font-medium mt-1">
-            Potential N₂O increase detected
-          </p>
+    <p className="text-lg font-medium mt-1">
+      {forecast
+        ? `Predicted N₂O emission rate: ${forecast.forecast.toFixed(4)}`
+        : "Historical AI model"}
+    </p>
 
-          <p className="text-sm text-[#969696] mt-1">
-            Explore alternative operating targets to
-            prepare for further process evaluation.
-            Forecast model integration is pending.
-          </p>
-        </div>
-      </div>
+    <p className="text-sm text-[#969696] mt-1">
+      {forecast
+        ? `XGBoost prediction for ${forecast.forecast_time}. Explore hypothetical aeration adjustments below.`
+        : "Retrieving model output and historical sensor readings."}
+    </p>
+
+    {dataError && (
+      <p className="text-sm text-[#ffb454] mt-2">
+        {dataError}
+      </p>
+    )}
+
+    <p className="text-xs text-[#969696] mt-3">
+      Historical demonstration only. The forecast model does not
+      establish how an aeration adjustment would change N₂O emissions.
+    </p>
+  </div>
+</div>
+
 
       {/* Baseline and proposed conditions */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
@@ -148,26 +238,27 @@ export default function InterventionLab() {
 
           <div className="grid grid-cols-2 gap-4">
             {[
-              {
-                label: "Dissolved oxygen",
-                value: "2.0",
-                unit: "mg/L",
-              },
-              {
-                label: "Temperature",
-                value: "20",
-                unit: "°C",
-              },
-              {
-                label: "Ammonia",
-                value: "3.5",
-                unit: "mg/L",
-              },
-              {
-                label: "N₂O forecast index",
-                value: "0.81",
-                unit: "demo",
-              },
+                  {
+                    label: "Dissolved oxygen",
+                    value: conditions.dissolved_oxygen.toFixed(2),
+                    unit: "reported",
+                  },
+                  {
+                    label: "Temperature",
+                    value: conditions.temperature.toFixed(2),
+                    unit: "reported",
+                  },
+                  {
+                    label: "Ammonia (NH₄)",
+                    value: conditions.ammonia.toFixed(2),
+                    unit: "reported",
+                  },
+                  {
+                    label: "N₂O forecast",
+                    value: conditions.n2o_forecast.toFixed(4),
+                    unit: "reported",
+                  },
+
             ].map((metric) => (
               <div
                 key={metric.label}
@@ -220,7 +311,7 @@ export default function InterventionLab() {
               max={4}
               step={0.1}
               value={targetDO}
-              disabled={loading}
+              disabled={loading || dataLoading || !plantConditions}
               onChange={(event) => {
                 setTargetDO(Number(event.target.value));
                 setResult(null);
@@ -239,8 +330,8 @@ export default function InterventionLab() {
               </span>
 
               <span className="text-[#22e000]">
-                {targetDO >= 2 ? "+" : ""}
-                {(targetDO - 2).toFixed(1)} mg/L
+                {targetDO >= conditions.dissolved_oxygen ? "+" : ""}
+                {(targetDO - conditions.dissolved_oxygen).toFixed(2)} mg/L
               </span>
             </div>
           </div>
@@ -273,7 +364,7 @@ export default function InterventionLab() {
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
         <AerationTank
-          targetDO={DEMO_CONDITIONS.dissolved_oxygen}
+          targetDO={conditions.dissolved_oxygen}
           mode="monitoring"
         />
 
@@ -503,7 +594,7 @@ export default function InterventionLab() {
 
           <button
             onClick={runOptimization}
-            disabled={optimizing}
+            disabled={optimizing || dataLoading || !plantConditions}
             className="rounded-xl border border-[#22e000]/40 text-[#22e000] px-5 py-3 text-sm font-medium flex items-center gap-2 hover:bg-[#22e000]/10 disabled:opacity-50"
           >
             {optimizing ? (

@@ -138,34 +138,44 @@ export async function fetchMonitoringSummary(): Promise<MonitoringSummaryRespons
   return response.json();
 }
 
-export interface MonitoringObservation {
-  time: string;
-  influent_flowrate: number | null;
-  dissolved_oxygen: number | null;
-  ammonium: number | null;
-  nitrate: number | null;
-  n2o: number | null;
-  temperature: number | null;
-  n2o_emission_rate: number | null;
+export interface ForecastReason {
+  sensor: string;
+  direction: "raises" | "lowers";
+  contribution: number;
 }
 
-export interface MonitoringHistoryResponse {
+export interface ForecastResponse {
+  forecast: number;
+  forecast_time: string;
+  risk_level: "normal" | "watch" | "high_risk";
+  watch_cutoff: number;
+  high_risk_cutoff: number;
+  spike_threshold: number;
+  top_reasons: ForecastReason[];
+  units: string;
+  target: string;
+  note: string;
   source: string;
   live: boolean;
+  model: string;
+  horizon_minutes: number;
+  sampling_interval_minutes: number;
+  window_start: string;
+  window_end: string;
   units_verified: boolean;
-  total: number;
-  offset: number;
-  count: number;
-  observations: MonitoringObservation[];
+  intervention_effect_verified: boolean;
 }
 
-export interface MonitoringSummaryResponse {
-  source: string;
-  live: boolean;
-  units_verified: boolean;
-  total_observations: number;
-  first_timestamp: string;
-  last_timestamp: string;
-  available_variables: string[];
-  notes: string[];
+export async function fetchLatestForecast(): Promise<ForecastResponse> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/forecast/latest`
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to load AI forecast (${response.status})`
+    );
+  }
+
+  return response.json();
 }

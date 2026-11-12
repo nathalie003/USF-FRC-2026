@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from routes.interventions import router as intervention_router
 from routes.monitoring import router as monitoring_router
+from routes.forecasting import router as forecasting_router
 
 
 app = FastAPI(
@@ -12,7 +13,7 @@ app = FastAPI(
         "AI-powered wastewater monitoring "
         "and intervention decision support"
     ),
-    version="0.2.0",
+    version="0.3.0",
 )
 
 app.add_middleware(
@@ -20,6 +21,8 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5173",
         "http://127.0.0.1:5173",
+        "http://localhost:5174",
+        "http://127.0.0.1:5174",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -28,13 +31,14 @@ app.add_middleware(
 
 app.include_router(intervention_router)
 app.include_router(monitoring_router)
+app.include_router(forecasting_router)
 
 
 @app.get("/")
 def root():
     return {
         "name": "N2O Guardian",
-        "version": "0.2.0",
+        "version": "0.3.0",
         "status": "online",
         "mode": "prototype",
     }
@@ -45,6 +49,6 @@ def health_check():
     return {
         "status": "healthy",
         "simulation_engine": "online",
-        "forecast_model": "not_connected",
+        "forecast_model": "integrated",
         "hardware": "not_connected",
     }
