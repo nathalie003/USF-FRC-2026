@@ -657,33 +657,7 @@ const conditions = plantConditions ?? DEMO_CONDITIONS;
                       %
                     </td>
 
-                    {optimization.eligible_scenarios === 0 && (
-  <div className="mt-5 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4">
-    <div className="flex items-start gap-3">
-      <AlertTriangle
-        size={20}
-        className="mt-0.5 shrink-0 text-amber-400"
-      />
-
-      <div>
-        <h3 className="text-sm font-semibold text-amber-400">
-          No eligible intervention identified
-        </h3>
-
-        <p className="mt-2 text-xs leading-relaxed text-neutral-300">
-          Historical dissolved oxygen conditions fall outside the
-          configured demonstration operating range. All candidate
-          adjustments require further engineering review.
-        </p>
-
-        <p className="mt-2 text-[11px] text-neutral-500">
-          No validated N₂O reduction recommendation is available.
-          Human review is required before any operational changes.
-        </p>
-      </div>
-    </div>
-  </div>
-)}
+                    
 
                     <td className="py-4 pr-4">
                       {scenario.within_demo_limits ? (
@@ -703,12 +677,43 @@ const conditions = plantConditions ?? DEMO_CONDITIONS;
                     </td>
                   </tr>
                 ))}
+              
               </tbody>
             </table>
+
+            {optimization.eligible_scenarios === 0 && (
+              <div className="mt-5 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle
+                    size={20}
+                    className="mt-0.5 shrink-0 text-amber-400"
+                  />
+
+                  <div>
+                    <h3 className="text-sm font-semibold text-amber-400">
+                      No eligible intervention identified
+                    </h3>
+
+                    <p className="mt-2 text-xs leading-relaxed text-neutral-300">
+                      Historical dissolved oxygen conditions fall outside
+                      the configured demonstration operating range.
+                      All candidate adjustments require further
+                      engineering review.
+                    </p>
+
+                    <p className="mt-2 text-[11px] text-neutral-500">
+                      No validated N₂O reduction recommendation is available.
+                      Human review is required before any operational changes.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <p className="text-xs text-[#969696] mt-4">
               {optimization.message}
             </p>
+
           </div>
         )}
       </section>
