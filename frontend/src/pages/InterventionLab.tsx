@@ -59,7 +59,7 @@ const [dataError, setDataError] = useState("");
 useEffect(() => {
   let active = true;
 
-  async function loadPlantConditions() {
+  async function loadPlantConditions() {;
     try {
       const [forecastResult, historyResult] = await Promise.all([
         fetchLatestForecast(),
@@ -88,6 +88,8 @@ useEffect(() => {
 
       setForecast(forecastResult);
       setPlantConditions(conditions);
+      setOptimization(null);
+      setResult(null);
       setTargetDO(
         Math.min(4, Math.max(0.5, conditions.dissolved_oxygen))
       );
@@ -138,21 +140,22 @@ const conditions = plantConditions ?? DEMO_CONDITIONS;
   }
 
   async function runOptimization() {
-    setOptimizing(true);
-    setError("");
+  setOptimization(null);
+  setOptimizing(true);
+  setError("");
 
-    try {
-      const data = await optimizeInterventions(
-        DEMO_CONDITIONS
-      );
+  try {
+    const data = await optimizeInterventions(
+      conditions
+    );
 
-      setOptimization(data);
-    } catch {
-      setError("Unable to evaluate candidate scenarios.");
-    } finally {
-      setOptimizing(false);
-    }
+    setOptimization(data);
+  } catch {
+    setError("Unable to evaluate candidate scenarios.");
+  } finally {
+    setOptimizing(false);
   }
+}
 
   const demandChange = result
     ? (result.relative_aeration_demand - 1) * 100
@@ -653,6 +656,34 @@ const conditions = plantConditions ?? DEMO_CONDITIONS;
                       ).toFixed(2)}
                       %
                     </td>
+
+                    {optimization.eligible_scenarios === 0 && (
+  <div className="mt-5 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4">
+    <div className="flex items-start gap-3">
+      <AlertTriangle
+        size={20}
+        className="mt-0.5 shrink-0 text-amber-400"
+      />
+
+      <div>
+        <h3 className="text-sm font-semibold text-amber-400">
+          No eligible intervention identified
+        </h3>
+
+        <p className="mt-2 text-xs leading-relaxed text-neutral-300">
+          Historical dissolved oxygen conditions fall outside the
+          configured demonstration operating range. All candidate
+          adjustments require further engineering review.
+        </p>
+
+        <p className="mt-2 text-[11px] text-neutral-500">
+          No validated N₂O reduction recommendation is available.
+          Human review is required before any operational changes.
+        </p>
+      </div>
+    </div>
+  </div>
+)}
 
                     <td className="py-4 pr-4">
                       {scenario.within_demo_limits ? (
