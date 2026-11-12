@@ -1,373 +1,246 @@
 
-import { useId, useState } from "react";
-import { Waves, Power, Cpu, Radio, Zap } from "lucide-react";
+import { useState } from "react";
+import { Activity, Pause, Play, Wind } from "lucide-react";
 
 interface AerationTankProps {
-  initialActive?: boolean;
+  oxygen?: number;
+  proposedDo?: number;
   targetDO?: number;
   relativeDemand?: number | null;
-  mode?: "monitoring" | "intervention";
+  mode?: string;
+  title?: string;
+  subtitle?: string;
 }
 
-const bubbles = Array.from({ length: 36 }, (_, i) => ({
-  x: 85 + (i * 23) % 235,
-  y: 163 + (i % 3) * 5,
-  r: 2 + (i % 4),
-  delay: (i * 0.21) % 3,
-  duration: 2 + (i % 4) * 0.4,
-}));
-
 export default function AerationTank({
-  initialActive = true,
-  targetDO = 2.0,
-  relativeDemand = null,
-  mode = "monitoring",
+  oxygen = 2.0,
+  proposedDo,
+  targetDO,
+  relativeDemand,
+  mode = "baseline",
+  title,
+  subtitle = "Illustrative virtual process visualization",
 }: AerationTankProps) {
-  const [active, setActive] = useState(initialActive);
+  const [running, setRunning] = useState(true);
 
-  const id = useId();
-  const waterId = `${id}-water`;
-  const sideId = `${id}-side`;
-  const glowId = `${id}-glow`;
+  const displayedOxygen = targetDO ?? proposedDo ?? oxygen;
 
-  const isIntervention = mode === "intervention";
-
-  // Animation intensity is illustrative.
-  // After evaluation, use the backend demand proxy.
-  const intensity = Math.max(
-    0.25,
-    Math.min(2, relativeDemand ?? targetDO / 2)
-  );
-
-  const bubbleCount = Math.min(
-    bubbles.length,
-    Math.round(18 * intensity)
-  );
-
-  const visibleBubbles = bubbles.slice(0, bubbleCount);
+  const displayTitle =
+    title ??
+    (mode === "proposed"
+      ? "Proposed aeration basin"
+      : "Baseline aeration basin");
 
   return (
-    <section className="panel p-6 h-full flex flex-col">
-      <div className="flex items-start justify-between mb-4">
+    <section className="panel flex h-full flex-col p-6">
+      <div className="mb-5 flex items-start justify-between gap-3">
         <div>
-          <p className="text-[10px] tracking-[0.18em] text-[#22e000] mb-2">
-            DIGITAL TWIN / 01
+          <p className="mb-2 text-[10px] font-semibold tracking-[0.12em] text-[#A8BFA4]">
+            PROCESS SCHEMATIC / 01
           </p>
-
-          <h2 className="text-lg font-semibold text-white">
-          {isIntervention
-            ? "Proposed aeration basin"
-            : "Baseline aeration basin"}
+          <h2 className="text-lg font-semibold text-[#F2F0E8]">
+            {displayTitle}
           </h2>
-
-          <p className="text-xs text-neutral-500 mt-1">
-            {isIntervention
-              ? "Proposed operating conditions"
-              : "Virtual process visualization"}
+          <p className="mt-1 text-xs text-[#9BAEB6]">
+            {subtitle}
           </p>
         </div>
 
-        <span className="flex items-center gap-1.5 text-[10px] text-neutral-400 border border-neutral-800 px-2.5 py-1.5 rounded-full">
-          <Radio size={12} />
-          {isIntervention ? "SCENARIO PREVIEW" : "SIMULATED"}
+        <span className="rounded-full border border-[#527D65]/40 px-3 py-1 text-[10px] text-[#A8BFA4]">
+          SIMULATED
         </span>
       </div>
 
-      <div className="relative flex-1 min-h-[240px] flex items-center justify-center rounded-xl overflow-hidden bg-[#0b0b0b] border border-neutral-900">
+      <div className="relative overflow-hidden rounded-md border border-[#294858] bg-[#0B2230]">
         <div
-          className="absolute inset-0 opacity-20"
+          className="pointer-events-none absolute inset-0 opacity-25"
           style={{
             backgroundImage:
-              "linear-gradient(#333 1px, transparent 1px),linear-gradient(90deg, #333 1px, transparent 1px)",
-            backgroundSize: "24px 24px",
+              "linear-gradient(#527D6520 1px, transparent 1px), linear-gradient(90deg, #527D6520 1px, transparent 1px)",
+            backgroundSize: "22px 22px",
           }}
         />
 
         <svg
-          viewBox="0 0 400 260"
-          className="relative w-full max-w-[400px]"
+          viewBox="0 0 600 260"
+          className="relative h-auto w-full"
           role="img"
-          aria-label="Virtual wastewater aeration tank"
+          aria-label="Illustrative animated wastewater aeration tank"
         >
           <defs>
-            <linearGradient
-              id={waterId}
-              x1="0"
-              y1="0"
-              x2="0"
-              y2="1"
-            >
-              <stop
-                offset="0%"
-                stopColor="#22e000"
-                stopOpacity=".22"
-              />
-
-              <stop
-                offset="100%"
-                stopColor="#22e000"
-                stopOpacity=".025"
-              />
+            <linearGradient id="guardianWater" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#527D65" stopOpacity="0.7" />
+              <stop offset="100%" stopColor="#123344" stopOpacity="0.9" />
             </linearGradient>
-
-            <linearGradient
-              id={sideId}
-              x1="0"
-              y1="0"
-              x2="1"
-              y2="1"
-            >
-              <stop offset="0%" stopColor="#222" />
-              <stop offset="100%" stopColor="#111" />
-            </linearGradient>
-
-            <filter id={glowId}>
-              <feGaussianBlur stdDeviation="1.2" />
-            </filter>
           </defs>
 
-          {/* Tank walls */}
           <path
-            d="M35 72 L85 40 H315 L365 72 V193 L315 225 H85 L35 193 Z"
-            fill={`url(#${sideId})`}
-            stroke="#555"
-            strokeWidth="1.2"
-          />
-
-          {/* Water surface */}
-          <path
-            d="M35 90 L85 58 H315 L365 90 L315 122 H85 Z"
-            fill="#142910"
-            stroke="#22e000"
-            strokeOpacity=".5"
-          />
-
-          {/* Front water volume */}
-          <path
-            d="M35 90 L85 122 H315 L365 90 V193 L315 225 H85 L35 193 Z"
-            fill={`url(#${waterId})`}
-            stroke="#365b2e"
-          />
-
-          {/* Tank edges */}
-          <path
-            d="M85 122 V225 M315 122 V225"
-            stroke="#555"
-            strokeWidth="1"
-          />
-
-          {/* Air diffuser */}
-          <path
-            d="M95 190 H305"
-            stroke={active ? "#22e000" : "#444"}
-            strokeWidth={active ? 3 + intensity : 4}
-            strokeLinecap="round"
-          />
-
-          {Array.from({ length: 9 }, (_, i) => (
-            <circle
-              key={i}
-              cx={100 + i * 25}
-              cy={190}
-              r="2.5"
-              fill={active ? "#b2ff9d" : "#666"}
-            />
-          ))}
-
-          {/* Dynamic aeration bubbles */}
-          {active &&
-            visibleBubbles.map((b, i) => (
-              <g
-                key={i}
-                style={{
-                  animation: `bubble-rise ${
-                    b.duration / intensity
-                  }s ${b.delay}s infinite`,
-                }}
-              >
-                <circle
-                  cx={b.x}
-                  cy={b.y}
-                  r={b.r + 2}
-                  fill="#22e000"
-                  opacity=".18"
-                  filter={`url(#${glowId})`}
-                />
-
-                <circle
-                  cx={b.x}
-                  cy={b.y}
-                  r={b.r}
-                  fill="#22e000"
-                  fillOpacity=".12"
-                  stroke="#72ff59"
-                  strokeWidth=".9"
-                />
-              </g>
-            ))}
-
-          {/* Dissolved oxygen sensor */}
-          <path
-            d="M270 36 V115"
-            stroke="#aaa"
+            d="M160 105 L220 65 L420 65 L480 105 L480 205 L420 240 L220 240 L160 205 Z"
+            fill="#163D43"
+            stroke="#789A91"
             strokeWidth="2"
           />
 
-          <rect
-            x="265"
-            y="108"
-            width="10"
-            height="20"
-            rx="3"
-            fill="#333"
-            stroke="#22e000"
-          />
-
-          <circle
-            cx="270"
-            cy="123"
-            r="2"
-            fill="#22e000"
+          <path
+            d="M160 105 L220 65 L420 65 L480 105 L420 145 L220 145 Z"
+            fill="#315F58"
+            stroke="#A8BFA4"
+            strokeWidth="1.5"
           />
 
           <path
-            d="M270 36 H350"
-            stroke="#22e000"
-            strokeDasharray="3 4"
+            d="M160 105 L220 145 L220 240 L160 205 Z"
+            fill="#204A4A"
+            opacity="0.9"
+          />
+
+          <path
+            d="M220 145 L420 145 L480 105 L480 205 L420 240 L220 240 Z"
+            fill="url(#guardianWater)"
+          />
+
+          <path
+            d="M220 145 L420 145 L480 105"
+            fill="none"
+            stroke="#A8BFA4"
+            strokeOpacity="0.5"
+          />
+
+          <path
+            d="M200 210 L440 210"
+            stroke="#A8BFA4"
+            strokeWidth="3"
+            strokeLinecap="round"
+          />
+
+          {Array.from({ length: 12 }, (_, index) => {
+            const x = 235 + (index % 6) * 37;
+            const y = 195 - Math.floor(index / 6) * 25;
+            const duration = 2 + (index % 4) * 0.35;
+
+            return (
+              <circle
+                key={index}
+                cx={x}
+                cy={y}
+                r={3 + (index % 3)}
+                fill="none"
+                stroke="#A8BFA4"
+                strokeWidth="1.5"
+                opacity={running ? 0.8 : 0.35}
+                style={
+                  running
+                    ? {
+                        animation: `bubble-rise ${duration}s ease-in infinite`,
+                        animationDelay: `${(index % 5) * -0.45}s`,
+                        transformBox: "fill-box",
+                        transformOrigin: "center",
+                      }
+                    : undefined
+                }
+              />
+            );
+          })}
+
+          <path
+            d="M390 42 L390 155"
+            stroke="#A8BFA4"
+            strokeWidth="2"
+          />
+          <rect
+            x="385"
+            y="145"
+            width="10"
+            height="17"
+            rx="2"
+            fill="#527D65"
+            stroke="#A8BFA4"
           />
 
           <text
-            x="350"
-            y="28"
-            textAnchor="end"
-            fill="#22e000"
-            fontSize="9"
+            x="403"
+            y="39"
+            fill="#A8BFA4"
+            fontSize="11"
+            fontWeight="600"
           >
-            {isIntervention
-              ? `DO TARGET: ${targetDO.toFixed(1)}`
-              : "DO SENSOR"}
+            DO SENSOR
           </text>
 
-          {/* Air supply line */}
           <path
-            d="M95 190 H15 V238 H130"
-            fill="none"
-            stroke={active ? "#22e000" : "#555"}
+            d="M200 210 L120 210 L120 245"
+            stroke="#A8BFA4"
             strokeWidth="1.5"
             strokeDasharray="5 4"
+            fill="none"
           />
-
-          <text
-            x="135"
-            y="242"
-            fill="#888"
-            fontSize="9"
-          >
-            AIR SUPPLY
-          </text>
-
-          <text
-            x="200"
-            y="253"
-            fill="#555"
-            fontSize="8"
-            textAnchor="middle"
-          >
-            BASIN A-01 · VIRTUAL MODEL
+          <text x="130" y="255" fill="#9BAEB6" fontSize="10">
+            AIR SUPPLY · VIRTUAL
           </text>
         </svg>
       </div>
 
-      {/* Tank metrics */}
-      <div className="grid grid-cols-2 gap-3 mt-4">
-        <div className="bg-[#0c0c0c] border border-neutral-800 rounded-xl p-3">
-          <div className="flex items-center gap-2 text-neutral-500 text-xs">
-            <Waves size={14} />
-
-            {isIntervention
-              ? "Proposed oxygen"
-              : "Oxygen"}
+      <div className="mt-3 grid grid-cols-2 gap-3">
+        <div className="rounded-md border border-[#294858] bg-[#0B2230] p-4">
+          <div className="mb-2 flex items-center gap-2 text-xs text-[#9BAEB6]">
+            <Activity size={14} />
+            Oxygen target
           </div>
-
-          <p className="text-xl font-semibold text-white mt-2">
-            {targetDO.toFixed(1)}
-            <span className="text-xs text-neutral-500 ml-1">
+          <p className="text-xl font-semibold text-[#F2F0E8]">
+            {displayedOxygen.toFixed(1)}
+            <span className="ml-1 text-xs font-normal text-[#9BAEB6]">
               mg/L
             </span>
           </p>
-
-          <p className="text-[10px] text-neutral-600 mt-1">
-            {isIntervention
-              ? "Operator-selected target"
-              : "Example reading"}
+          <p className="mt-1 text-[10px] text-[#9BAEB6]">
+            Illustrative virtual reading
           </p>
         </div>
 
-        <div className="bg-[#0c0c0c] border border-neutral-800 rounded-xl p-3">
-          <div className="flex items-center gap-2 text-neutral-500 text-xs">
-            {isIntervention ? (
-              <Zap size={14} />
-            ) : (
-              <Cpu size={14} />
-            )}
-
-            {isIntervention
-              ? "Transfer capacity"
-              : "Virtual pump"}
+        <div className="rounded-md border border-[#294858] bg-[#0B2230] p-4">
+          <div className="mb-2 flex items-center gap-2 text-xs text-[#9BAEB6]">
+            <Wind size={14} />
+            Virtual pump
           </div>
-
-          <p
-            className={`text-xl font-semibold mt-2 ${
-              active
-                ? "text-[#22e000]"
-                : "text-neutral-400"
-            }`}
-          >
-            {isIntervention
-              ? relativeDemand !== null
-                ? `${(relativeDemand * 100).toFixed(1)}%`
-                : "Preview"
-              : active
-                ? "Active"
-                : "Inactive"}
+          <p className="text-xl font-semibold text-[#A8BFA4]">
+            {running ? "Active" : "Paused"}
           </p>
-
-          <p className="text-[10px] text-neutral-600 mt-1">
-            {isIntervention
-              ? relativeDemand !== null
-                ? "Relative to baseline"
-                : "Run scenario to calculate"
-              : "Simulation only"}
+          <p className="mt-1 text-[10px] text-[#9BAEB6]">
+            Simulation only
           </p>
         </div>
       </div>
 
-      {/* Virtual pump control */}
       <button
         type="button"
-        onClick={() => setActive(!active)}
-        aria-pressed={active}
-        className={`mt-4 w-full flex items-center justify-center gap-2 rounded-lg py-3 text-xs font-semibold transition-colors ${
-          active
-            ? "border border-neutral-700 text-neutral-300 hover:bg-white/5"
-            : "bg-[#22e000] text-black hover:bg-[#35f011]"
-        }`}
+        onClick={() => setRunning((previous) => !previous)}
+        className="mt-3 flex items-center justify-center gap-2 rounded-md border border-[#294858] px-4 py-3 text-xs text-[#C0D0D0] transition-colors hover:bg-[#527D65]/20"
       >
-        <Power size={15} />
-
-        {active
-          ? "Pause virtual aeration"
-          : "Start virtual aeration"}
+        {running ? <Pause size={14} /> : <Play size={14} />}
+        {running ? "Pause virtual aeration" : "Resume virtual aeration"}
       </button>
 
-      {isIntervention && (
-        <p className="text-[10px] text-neutral-500 mt-3">
-          Illustrative animation. Bubble intensity is a
-          visualization of the proposed setting or
-          calculated transfer-capacity proxy, not actual
-          pump output or a predicted biological response.
-        </p>
-      )}
+      {relativeDemand != null && (
+  <div className="mt-3 rounded-md border border-[#294858] bg-[#0B2230] p-4">
+    <p className="text-xs text-[#9BAEB6]">
+      Relative oxygen-transfer demand
+    </p>
+
+    <p className="mt-2 text-xl font-semibold text-[#A8BFA4]">
+      {(relativeDemand * 100).toFixed(1)}%
+    </p>
+
+    <p className="mt-1 text-[10px] text-[#9BAEB6]">
+      Simplified proxy relative to baseline
+    </p>
+  </div>
+)}
+
+      <p className="mt-3 text-[10px] leading-relaxed text-[#9BAEB6]">
+        Conceptual animation only. Bubble motion does not represent
+        measured airflow, verified oxygen transfer or predicted
+        biological response.
+      </p>
     </section>
   );
 }

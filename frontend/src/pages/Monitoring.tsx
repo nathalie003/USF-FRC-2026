@@ -113,25 +113,25 @@ export default function Monitoring() {
       label: "Dissolved oxygen",
       value: formatValue(latest?.dissolved_oxygen ?? null),
       icon: Droplets,
-      color: "#22e000",
+      color: "#A8BFA4",
     },
     {
       label: "Temperature",
       value: formatValue(latest?.temperature ?? null),
       icon: Thermometer,
-      color: "#a8f08a",
+      color: "#A8BFA4",
     },
     {
       label: "Ammonium (NH₄)",
       value: formatValue(latest?.ammonium ?? null),
       icon: FlaskConical,
-      color: "#8bc5ff",
+      color: "#8FAFBD",
     },
     {
       label: "N₂O emission rate",
       value: formatValue(latest?.n2o_emission_rate ?? null),
       icon: Activity,
-      color: "#ffb454",
+      color: "#D8B580",
     },
   ];
 
@@ -153,24 +153,24 @@ export default function Monitoring() {
   };
 
   return (
-    <div className="space-y-6 pb-8">
-      <header className="flex flex-wrap items-start justify-between gap-4">
+    <div className="workspace-page space-y-6 pb-8">
+      <header className="page-header flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-xs tracking-[0.25em] text-[#22e000] uppercase mb-2">
-            Guardian / Monitoring
+          <p className="text-xs tracking-[0.12em] text-[#A8BFA4] uppercase mb-2">
+            PROCESS MONITORING / 02
           </p>
 
-          <h1 className="text-4xl font-semibold tracking-tight">
-            Plant telemetry.
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Historical process monitoring
           </h1>
 
-          <p className="text-[#969696] mt-2">
+          <p className="text-[#A3B5BF] mt-2">
             Explore recorded wastewater conditions and
             historical N₂O emissions.
           </p>
         </div>
 
-        <span className="flex items-center gap-2 border border-[#333] rounded-full px-4 py-2 text-xs text-[#969696]">
+        <span className="flex items-center gap-2 border border-[#344957] rounded-full px-4 py-2 text-xs text-[#A3B5BF]">
           <Database size={14} />
           HISTORICAL DATA
         </span>
@@ -179,7 +179,7 @@ export default function Monitoring() {
       <section className="panel p-5">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <p className="text-xs text-[#969696] mb-1">
+            <p className="text-xs text-[#A3B5BF] mb-1">
               Historical dataset
             </p>
 
@@ -189,7 +189,7 @@ export default function Monitoring() {
                 : "Loading dataset..."}
             </p>
 
-            <p className="text-xs text-[#777] mt-1">
+            <p className="text-xs text-[#94A9B4] mt-1">
               {summary
                 ? `${formatTime(summary.first_timestamp)} — ${formatTime(summary.last_timestamp)}`
                 : "Checking data coverage"}
@@ -199,7 +199,7 @@ export default function Monitoring() {
           <button
             type="button"
             onClick={() => setRefreshKey((value) => value + 1)}
-            className="flex items-center gap-2 rounded-lg border border-[#333] px-4 py-2 text-sm hover:border-[#22e000] transition-colors"
+            className="flex items-center gap-2 rounded-md border border-[#344957] px-4 py-2 text-sm hover:border-[#A8BFA4] transition-colors"
           >
             <RefreshCw size={15} />
             Refresh
@@ -208,7 +208,7 @@ export default function Monitoring() {
       </section>
 
       {error && (
-        <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300">
+        <div className="rounded-md border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300">
           {error}
         </div>
       )}
@@ -220,7 +220,7 @@ export default function Monitoring() {
           return (
             <div key={metric.label} className="panel p-5">
               <div className="flex items-center justify-between">
-                <p className="text-sm text-[#969696]">
+                <p className="text-sm text-[#A3B5BF]">
                   {metric.label}
                 </p>
 
@@ -233,11 +233,11 @@ export default function Monitoring() {
                 </span>
               </div>
 
-              <p className="text-xs text-[#777] mt-3">
+              <p className="text-xs text-[#94A9B4] mt-3">
                 Latest value in selected window
               </p>
 
-              <p className="text-[11px] text-[#777] mt-1">
+              <p className="text-[11px] text-[#94A9B4] mt-1">
                 Units not verified
               </p>
             </div>
@@ -248,7 +248,7 @@ export default function Monitoring() {
       <section className="panel p-6">
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
           <div>
-            <p className="text-[10px] tracking-widest text-[#22e000] mb-2">
+            <p className="text-[10px] tracking-widest text-[#A8BFA4] mb-2">
               HISTORICAL REPLAY
             </p>
 
@@ -256,7 +256,7 @@ export default function Monitoring() {
               Process conditions
             </h2>
 
-            <p className="text-sm text-[#969696] mt-1">
+            <p className="text-sm text-[#A3B5BF] mt-1">
               Navigate through recorded observations.
             </p>
           </div>
@@ -266,14 +266,15 @@ export default function Monitoring() {
               <button
                 key={size}
                 type="button"
+                aria-pressed={windowSize === size}
                 onClick={() => {
                   setWindowSize(size);
                   setOffset(0);
                 }}
-                className={`px-3 py-2 rounded-lg text-xs border transition-colors ${
+                className={`px-3 py-2 rounded-md text-xs border transition-colors ${
                   windowSize === size
-                    ? "bg-[#22e000] border-[#22e000] text-black font-semibold"
-                    : "border-[#333] text-[#969696] hover:text-white"
+                    ? "bg-[#A8BFA4] border-[#A8BFA4] text-black font-semibold"
+                    : "border-[#344957] text-[#A3B5BF] hover:text-white"
                 }`}
               >
                 {size} readings
@@ -283,7 +284,7 @@ export default function Monitoring() {
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
-          <p className="text-xs text-[#969696]">
+          <p className="text-xs text-[#A3B5BF]">
             {firstVisible && lastVisible
               ? `${formatTime(firstVisible)} → ${formatTime(lastVisible)}`
               : "No observations selected"}
@@ -294,7 +295,7 @@ export default function Monitoring() {
               type="button"
               disabled={!canGoBack || loading}
               onClick={() => moveWindow(-1)}
-              className="flex items-center gap-1 rounded-lg border border-[#333] px-3 py-2 text-xs disabled:opacity-30 hover:border-[#22e000]"
+              className="flex items-center gap-1 rounded-md border border-[#344957] px-3 py-2 text-xs disabled:opacity-30 hover:border-[#A8BFA4]"
             >
               <ChevronLeft size={14} />
               Previous
@@ -304,7 +305,7 @@ export default function Monitoring() {
               type="button"
               disabled={!canGoForward || loading}
               onClick={() => moveWindow(1)}
-              className="flex items-center gap-1 rounded-lg border border-[#333] px-3 py-2 text-xs disabled:opacity-30 hover:border-[#22e000]"
+              className="flex items-center gap-1 rounded-md border border-[#344957] px-3 py-2 text-xs disabled:opacity-30 hover:border-[#A8BFA4]"
             >
               Next
               <ChevronRight size={14} />
@@ -319,14 +320,14 @@ export default function Monitoring() {
               margin={{ top: 12, right: 16, left: 0, bottom: 8 }}
             >
               <CartesianGrid
-                stroke="#252525"
+                stroke="#29404E"
                 strokeDasharray="3 5"
                 vertical={false}
               />
 
               <XAxis
                 dataKey="label"
-                stroke="#777"
+                stroke="#94A9B4"
                 tickLine={false}
                 axisLine={false}
                 fontSize={10}
@@ -334,7 +335,7 @@ export default function Monitoring() {
               />
 
               <YAxis
-                stroke="#969696"
+                stroke="#A3B5BF"
                 tickLine={false}
                 axisLine={false}
                 fontSize={11}
@@ -342,9 +343,9 @@ export default function Monitoring() {
 
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "#121212",
-                  border: "1px solid #333",
-                  borderRadius: 12,
+                  backgroundColor: "#102633",
+                  border: "1px solid #344957",
+                  borderRadius: 4,
                   color: "#fff",
                 }}
               />
@@ -355,7 +356,7 @@ export default function Monitoring() {
                 type="monotone"
                 dataKey="dissolved_oxygen"
                 name="Dissolved oxygen"
-                stroke="#22e000"
+                stroke="#A8BFA4"
                 strokeWidth={2.5}
                 dot={false}
                 connectNulls={false}
@@ -366,7 +367,7 @@ export default function Monitoring() {
                 type="monotone"
                 dataKey="ammonium"
                 name="Ammonium"
-                stroke="#8bc5ff"
+                stroke="#8FAFBD"
                 strokeWidth={2}
                 dot={false}
                 connectNulls={false}
@@ -377,7 +378,7 @@ export default function Monitoring() {
                 type="monotone"
                 dataKey="nitrate"
                 name="Nitrate"
-                stroke="#b2ff9d"
+                stroke="#C0CBB1"
                 strokeWidth={2}
                 dot={false}
                 connectNulls={false}
@@ -387,7 +388,7 @@ export default function Monitoring() {
           </ResponsiveContainer>
         </div>
 
-        <p className="text-xs text-[#777] mt-4">
+        <p className="text-xs text-[#94A9B4] mt-4">
           Recorded historical values. Measurement units have
           not yet been verified from the original dataset.
         </p>
@@ -395,7 +396,7 @@ export default function Monitoring() {
 
       <section className="panel p-6">
         <div className="mb-6">
-          <p className="text-[10px] tracking-widest text-[#ffb454] mb-2">
+          <p className="text-[10px] tracking-widest text-[#D8B580] mb-2">
             N₂O ANALYTICS
           </p>
 
@@ -403,7 +404,7 @@ export default function Monitoring() {
             Recorded N₂O emission rate
           </h2>
 
-          <p className="text-sm text-[#969696] mt-1">
+          <p className="text-sm text-[#A3B5BF] mt-1">
             Historical emissions signal for the selected window.
           </p>
         </div>
@@ -415,14 +416,14 @@ export default function Monitoring() {
               margin={{ top: 12, right: 16, left: 0, bottom: 8 }}
             >
               <CartesianGrid
-                stroke="#252525"
+                stroke="#29404E"
                 strokeDasharray="3 5"
                 vertical={false}
               />
 
               <XAxis
                 dataKey="label"
-                stroke="#777"
+                stroke="#94A9B4"
                 tickLine={false}
                 axisLine={false}
                 fontSize={10}
@@ -430,7 +431,7 @@ export default function Monitoring() {
               />
 
               <YAxis
-                stroke="#969696"
+                stroke="#A3B5BF"
                 tickLine={false}
                 axisLine={false}
                 fontSize={11}
@@ -438,9 +439,9 @@ export default function Monitoring() {
 
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "#121212",
-                  border: "1px solid #333",
-                  borderRadius: 12,
+                  backgroundColor: "#102633",
+                  border: "1px solid #344957",
+                  borderRadius: 4,
                   color: "#fff",
                 }}
               />
@@ -449,7 +450,7 @@ export default function Monitoring() {
                 type="monotone"
                 dataKey="n2o_emission_rate"
                 name="Recorded N₂O emission rate"
-                stroke="#ffb454"
+                stroke="#D8B580"
                 strokeWidth={2.5}
                 dot={false}
                 connectNulls={false}
@@ -459,7 +460,7 @@ export default function Monitoring() {
           </ResponsiveContainer>
         </div>
 
-        <p className="text-xs text-[#777] mt-4">
+        <p className="text-xs text-[#94A9B4] mt-4">
           Emission-rate units and calibration are not yet
           verified. This chart does not represent a model
           prediction or a validated intervention outcome.
@@ -470,7 +471,7 @@ export default function Monitoring() {
         <div className="flex gap-3">
           <AlertTriangle
             size={20}
-            className="text-[#ffb454] shrink-0"
+            className="text-[#D8B580] shrink-0"
           />
 
           <div>
@@ -478,7 +479,7 @@ export default function Monitoring() {
               Research dataset limitations
             </h3>
 
-            <p className="text-sm text-[#969696] mt-2 leading-relaxed">
+            <p className="text-sm text-[#A3B5BF] mt-2 leading-relaxed">
               These readings are historical observations,
               not live sensor data. Measurement units and
               sensor calibration remain unverified. The

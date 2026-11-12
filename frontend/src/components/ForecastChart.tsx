@@ -1,4 +1,3 @@
-
 import {
   Area,
   AreaChart,
@@ -34,16 +33,16 @@ export default function ForecastChart({
     <section className="panel p-6 h-full flex flex-col">
       <div className="flex justify-between items-start mb-5">
         <div>
-          <p className="text-[10px] tracking-[0.18em] text-[#22e000] mb-2">
-            PREDICTIVE ANALYTICS
+          <p className="text-[10px] tracking-[0.18em] text-[#A8BFA4] mb-2">
+            HISTORICAL TREND / N₂O
           </p>
 
           <h2 className="text-lg font-semibold text-white">
-            Emissions intelligence
+            Emission rate & forecast
           </h2>
 
           <p className="text-xs text-neutral-500 mt-1">
-            Historical N₂O emissions and AI prediction
+            Historical observations · XGBoost 30-minute forecast
           </p>
         </div>
 
@@ -53,7 +52,7 @@ export default function ForecastChart({
       </div>
 
       <div className="flex items-baseline gap-3 mb-5">
-        <h3 className="text-4xl font-semibold text-white">
+        <h3 className="text-2xl font-semibold text-white">
           {forecastValue !== undefined
             ? forecastValue.toFixed(4)
             : "—"}
@@ -72,36 +71,36 @@ export default function ForecastChart({
           >
             <defs>
               <linearGradient id="guardianFill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#22e000" stopOpacity={0.28} />
-                <stop offset="100%" stopColor="#22e000" stopOpacity={0} />
+                <stop offset="0%" stopColor="#A8BFA4" stopOpacity={0.28} />
+                <stop offset="100%" stopColor="#A8BFA4" stopOpacity={0} />
               </linearGradient>
             </defs>
 
             <CartesianGrid
-              stroke="#252525"
+              stroke="#294858"
               strokeDasharray="3 5"
               vertical={false}
             />
 
             <XAxis
               dataKey="time"
-              tick={{ fill: "#777", fontSize: 10 }}
+              tick={{ fill: "#94A9B4", fontSize: 10 }}
               axisLine={false}
               tickLine={false}
               minTickGap={20}
             />
 
             <YAxis
-              tick={{ fill: "#777", fontSize: 10 }}
+              tick={{ fill: "#94A9B4", fontSize: 10 }}
               axisLine={false}
               tickLine={false}
             />
 
             <Tooltip
               contentStyle={{
-                backgroundColor: "#171717",
-                border: "1px solid #333",
-                borderRadius: "10px",
+                backgroundColor: "#102B3B",
+                border: "1px solid #527D65",
+                borderRadius: "2px",
                 fontSize: "12px",
               }}
               labelStyle={{ color: "#aaa" }}
@@ -125,7 +124,7 @@ export default function ForecastChart({
               type="monotone"
               dataKey="observed"
               name="Observed"
-              stroke="#22e000"
+              stroke="#A8BFA4"
               strokeWidth={2}
               fill="url(#guardianFill)"
               connectNulls={false}
@@ -136,13 +135,13 @@ export default function ForecastChart({
                 x={forecastTime}
                 y={forecastValue}
                 r={6}
-                fill="#ffb454"
+                fill="#E6B66A"
                 stroke="#ffffff"
                 strokeWidth={1.5}
                 label={{
-                  value: "AI",
+                  value: "+30 MIN",
                   position: "top",
-                  fill: "#ffb454",
+                  fill: "#E6B66A",
                   fontSize: 10,
                 }}
               />
@@ -153,14 +152,14 @@ export default function ForecastChart({
 
       <div className="flex flex-wrap gap-5 mt-4">
         <div className="flex items-center gap-2">
-          <span className="w-5 h-0.5 bg-[#22e000]" />
+          <span className="w-5 h-0.5 bg-[#A8BFA4]" />
           <span className="text-xs text-neutral-400">
             Historical observations
           </span>
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="w-3 h-3 rounded-full bg-[#ffb454]" />
+          <span className="w-3 h-3 rounded-full bg-[#E6B66A]" />
           <span className="text-xs text-neutral-400">
             XGBoost +30-minute prediction
           </span>
@@ -169,7 +168,7 @@ export default function ForecastChart({
 
       <p className="text-[10px] text-neutral-600 mt-4">
         Historical replay · Reported units are unverified ·
-        AI forecast is decision support only
+        Demonstration forecast · Not for operational control
       </p>
     </section>
   );

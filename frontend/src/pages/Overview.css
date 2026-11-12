@@ -1,0 +1,63 @@
+.engineering-overview { max-width: 1560px; margin: auto; font-family: inherit; color: #dce5e8; font-size: 13px; }
+.engineering-overview h1, .engineering-overview h2, .engineering-overview h3 { font-family: inherit; letter-spacing: -.015em; }
+.overview-register { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; padding-bottom: 12px; border-bottom: 1px solid #344957; font: 10px/1.5 ui-monospace, monospace; letter-spacing: .08em; color: #a8bfa4; }
+.replay-label { color: #d6bb86; }
+.plant-header { display: grid; grid-template-columns: 1fr 300px; gap: 24px; align-items: center; padding: 18px 0; }
+.section-code { color: #a8bfa4; font: 10px/1.5 ui-monospace, monospace; letter-spacing: .1em; margin: 0 0 5px; }
+.plant-header h1 { font-size: 26px; font-weight: 600; margin: 0 0 5px; }
+.plant-header > div > p:not(.section-code) { color: #aabac3; margin: 0; }
+.header-facts { display: flex; flex-wrap: wrap; gap: 10px 28px; margin: 16px 0 0; }
+.header-facts dt { color: #98aeb8; font-size: 10px; text-transform: uppercase; margin-bottom: 3px; }
+.header-facts dd { margin: 0; font-size: 11px; }
+.plant-photo { margin: 0; }
+.plant-photo img { display: block; width: 100%; height: 108px; object-fit: cover; object-position: center 55%; }
+.engineering-overview figcaption { color: #a7b8c0; font-size: 10px; line-height: 1.5; margin-top: 5px; }
+.instrument-strip { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border: 1px solid #344957; margin-bottom: 16px; background: #102633; }
+.engineering-overview .panel { border-radius: 2px; background: #102633; box-shadow: none; border-color: #344957; transition: none; min-width: 0; }
+.instrument-strip > .panel { border: 0; border-right: 1px solid #344957; padding: 14px; }
+.instrument-strip > .panel:last-child { border-right: 0; }
+.instrument-strip .panel > div:first-child { margin-bottom: 8px; }
+.instrument-strip .panel > div:first-child > div { padding: 0; border: 0; background: none; }
+.instrument-strip h2 { font: 600 24px/1.3 ui-monospace, monospace; overflow-wrap: anywhere; }
+.instrument-strip .panel > div:last-child { margin-top: 5px; }
+.instrument-strip .panel > div:last-child > span { display: none; }
+.engineering-overview .text-neutral-500, .engineering-overview .text-neutral-600 { color: #a3b5bf; }
+.overview-columns { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(300px, 1fr); gap: 16px; align-items: start; }
+.analysis-column, .equipment-column { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.engineering-overview .panel.p-6 { padding: 16px; height: auto; }
+.engineering-overview .panel h2 { font-size: 16px; }
+.engineering-overview [class*="rounded-"] { border-radius: 2px; }
+.technical-panel { border: 1px solid #344957; background: #102633; padding: 16px; min-width: 0; }
+.section-heading { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; border-bottom: 1px solid #344957; padding-bottom: 12px; margin-bottom: 12px; }
+.section-heading h2, .scenario-link h2 { font-size: 16px; font-weight: 600; margin: 0; }
+.section-heading > span { font: 10px/1.5 ui-monospace, monospace; color: #a3b5bf; }
+.forecast-record { margin: 0; }
+.forecast-record > div { display: grid; grid-template-columns: minmax(130px, .8fr) minmax(0, 1.2fr); gap: 12px; border-bottom: 1px solid #293e4b; padding: 9px 0; }
+.forecast-record dt { color: #a3b5bf; font-size: 12px; }
+.forecast-record dd { margin: 0; font: 12px/1.6 ui-monospace, monospace; overflow-wrap: anywhere; }
+.forecast-record small { color: #a3b5bf; font: 10px Arial, sans-serif; }
+.table-heading { font-size: 12px; margin: 18px 0 9px; font-weight: 600; }
+.table-scroll { overflow-x: auto; }
+.engineering-overview table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.engineering-overview th, .engineering-overview td { text-align: left; border-bottom: 1px solid #344957; padding: 10px 8px; }
+.engineering-overview thead { background: #192f3c; color: #adbec5; font-size: 10px; text-transform: uppercase; }
+.engineering-overview tbody th { font-weight: 400; overflow-wrap: anywhere; }
+.engineering-overview .numeric { text-align: right; font-family: ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+.contribution-raises { color: #dfbd83; white-space: nowrap; }
+.contribution-lowers { color: #a8bfa4; white-space: nowrap; }
+.technical-note { font-size: 11px; color: #a3b5bf; line-height: 1.7; margin: 12px 0 0; }
+.basin-reference figure { margin: 0; display: grid; grid-template-columns: 120px 1fr; gap: 12px; align-items: center; }
+.basin-reference img { width: 120px; height: 80px; object-fit: cover; }
+.scenario-link { border-left: 2px solid #7e9c83; padding: 4px 14px; }
+.scenario-link > p:not(.section-code) { font-size: 12px; line-height: 1.7; color: #a3b5bf; margin: 8px 0; }
+.scenario-link a { color: #b9cfb2; font-size: 12px; display: inline-flex; gap: 16px; padding: 6px 0; }
+.overview-footer { margin-top: 20px; padding: 12px 0; border-top: 1px solid #344957; display: flex; justify-content: space-between; gap: 20px; color: #a3b5bf; font-size: 10px; line-height: 1.8; }
+.overview-footer p { margin: 0; }
+.overview-footer details { max-width: 420px; }
+.overview-footer summary { cursor: pointer; color: #b9cfb2; }
+.overview-footer a { text-decoration: underline; }
+.data-notice { padding: 12px; margin-bottom: 16px; border: 1px solid #ad8753; background: #302b24; color: #eed4a5; }
+.engineering-overview a:focus-visible, .engineering-overview button:focus-visible, .engineering-overview summary:focus-visible { outline: 2px solid #b9cfb2; outline-offset: 4px; }
+@media (max-width: 1200px) { .overview-columns { grid-template-columns: minmax(0, 1fr); } .plant-header { grid-template-columns: 1fr 220px; } }
+@media (max-width: 760px) { .plant-header { grid-template-columns: 1fr; gap: 14px; } .plant-photo img { height: 100px; } .instrument-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); } .instrument-strip > .panel:nth-child(2) { border-right: 0; } .instrument-strip > .panel:nth-child(-n+2) { border-bottom: 1px solid #344957; } .overview-footer { flex-direction: column; gap: 10px; } }
+@media (max-width: 400px) { .forecast-record > div { grid-template-columns: 1fr; gap: 3px; } .instrument-strip h2 { font-size: 20px; } }

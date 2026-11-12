@@ -35,6 +35,35 @@ const DEMO_CONDITIONS = {
 };
 
 export default function InterventionLab() {
+    // Arduino hardware demonstration
+  const [hardwareBusy, setHardwareBusy] = useState(false);
+  const [hardwareMessage, setHardwareMessage] = useState("");
+
+  async function runHardwareDemo() {
+    setHardwareBusy(true);
+    setHardwareMessage("");
+
+    try {
+      const response = await fetch(
+        "http://127.0.0.1:8000/api/hardware/run",
+        { method: "POST" }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.detail || "Hardware demo failed");
+      }
+
+      setHardwareMessage("Arduino demo completed successfully.");
+    } catch (error) {
+      setHardwareMessage(
+        error instanceof Error ? error.message : "Connection failed"
+      );
+    } finally {
+      setHardwareBusy(false);
+    }
+  }
   const [targetDO, setTargetDO] = useState(2.5);
   const [result, setResult] =
     useState<ScenarioResult | null>(null);
@@ -162,26 +191,25 @@ const conditions = plantConditions ?? DEMO_CONDITIONS;
     : null;
 
   return (
-    <div className="space-y-6">
+    <div className="workspace-page space-y-6">
 
       {/* Header */}
-      <header className="flex flex-wrap items-start justify-between gap-4">
+      <header className="page-header flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-xs tracking-[0.25em] text-[#22e000] uppercase mb-2">
-            Guardian / Intervention Lab
+          <p className="text-xs tracking-[0.12em] text-[#A8BFA4] uppercase mb-2">
+            SCENARIO ANALYSIS / 03
           </p>
 
-          <h1 className="text-4xl font-semibold tracking-tight">
-            Simulate before you act.
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Aeration scenario evaluation
           </h1>
 
-          <p className="text-[#969696] mt-2">
-            Explore operating adjustments before applying
-            changes to wastewater treatment systems.
+          <p className="text-[#A3B5BF] mt-2">
+            Evaluate hypothetical aeration targets against demonstration operating constraints.
           </p>
         </div>
 
-        <div className="flex items-center gap-2 rounded-full border border-[#333] px-4 py-2 text-xs text-[#969696]">
+        <div className="flex items-center gap-2 rounded-full border border-[#344957] px-4 py-2 text-xs text-[#A3B5BF]">
           <FlaskConical size={14} />
           DEMO CONDITIONS
         </div>
@@ -190,36 +218,36 @@ const conditions = plantConditions ?? DEMO_CONDITIONS;
       
 {/* Forecast alert */}
 <div className="panel p-5 flex items-start gap-4">
-  <div className="rounded-xl bg-[#22e000]/10 p-3 text-[#22e000]">
+  <div className="rounded-md bg-[#A8BFA4]/10 p-3 text-[#A8BFA4]">
     <AlertTriangle size={22} />
   </div>
 
   <div>
-    <p className="text-sm font-medium text-[#22e000]">
+    <p className="text-sm font-medium text-[#A8BFA4]">
       {forecast
-        ? `AI forecast: ${forecast.risk_level.replace("_", " ")}`
+        ? `XGBoost risk classification: ${forecast.risk_level.replace("_", " ")}`
         : "Loading historical forecast"}
     </p>
 
     <p className="text-lg font-medium mt-1">
       {forecast
         ? `Predicted N₂O emission rate: ${forecast.forecast.toFixed(4)}`
-        : "Historical AI model"}
+        : "Historical XGBoost model"}
     </p>
 
-    <p className="text-sm text-[#969696] mt-1">
+    <p className="text-sm text-[#A3B5BF] mt-1">
       {forecast
         ? `XGBoost prediction for ${forecast.forecast_time}. Explore hypothetical aeration adjustments below.`
         : "Retrieving model output and historical sensor readings."}
     </p>
 
     {dataError && (
-      <p className="text-sm text-[#ffb454] mt-2">
+      <p className="text-sm text-[#D8B580] mt-2">
         {dataError}
       </p>
     )}
 
-    <p className="text-xs text-[#969696] mt-3">
+    <p className="text-xs text-[#A3B5BF] mt-3">
       Historical demonstration only. The forecast model does not
       establish how an aeration adjustment would change N₂O emissions.
     </p>
@@ -231,12 +259,12 @@ const conditions = plantConditions ?? DEMO_CONDITIONS;
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
         <section className="panel p-6">
-          <p className="text-xs tracking-widest text-[#969696] mb-4">
+          <p className="text-xs tracking-widest text-[#A3B5BF] mb-4">
             01 / BASELINE CONDITIONS
           </p>
 
           <h2 className="text-xl font-medium mb-6">
-            Current plant state
+            Historical baseline conditions
           </h2>
 
           <div className="grid grid-cols-2 gap-4">
@@ -244,36 +272,36 @@ const conditions = plantConditions ?? DEMO_CONDITIONS;
                   {
                     label: "Dissolved oxygen",
                     value: conditions.dissolved_oxygen.toFixed(2),
-                    unit: "reported",
+                    unit: "units unverified",
                   },
                   {
                     label: "Temperature",
                     value: conditions.temperature.toFixed(2),
-                    unit: "reported",
+                    unit: "units unverified",
                   },
                   {
                     label: "Ammonia (NH₄)",
                     value: conditions.ammonia.toFixed(2),
-                    unit: "reported",
+                    unit: "units unverified",
                   },
                   {
                     label: "N₂O forecast",
                     value: conditions.n2o_forecast.toFixed(4),
-                    unit: "reported",
+                    unit: "units unverified",
                   },
 
             ].map((metric) => (
               <div
                 key={metric.label}
-                className="rounded-xl bg-[#080808] border border-[#252525] p-4"
+                className="rounded-md bg-[#0C2230] border border-[#29404E] p-4"
               >
-                <p className="text-xs text-[#969696]">
+                <p className="text-xs text-[#A3B5BF]">
                   {metric.label}
                 </p>
 
                 <p className="text-2xl font-semibold mt-2">
                   {metric.value}
-                  <span className="text-xs text-[#969696] ml-2">
+                  <span className="text-xs text-[#A3B5BF] ml-2">
                     {metric.unit}
                   </span>
                 </p>
@@ -284,13 +312,13 @@ const conditions = plantConditions ?? DEMO_CONDITIONS;
 
         <section className="panel p-6">
           <div className="flex justify-between items-center mb-4">
-            <p className="text-xs tracking-widest text-[#969696]">
+            <p className="text-xs tracking-widest text-[#A3B5BF]">
               02 / PROPOSED INTERVENTION
             </p>
 
             <SlidersHorizontal
               size={18}
-              className="text-[#22e000]"
+              className="text-[#A8BFA4]"
             />
           </div>
 
@@ -299,12 +327,12 @@ const conditions = plantConditions ?? DEMO_CONDITIONS;
           </h2>
 
           <div className="mt-7">
-            <p className="text-sm text-[#969696]">
+            <p className="text-sm text-[#A3B5BF]">
               Proposed dissolved oxygen
             </p>
 
-            <p className="text-5xl font-semibold text-[#22e000] mt-2">
-              {targetDO.toFixed(1)}
+            <p className="text-3xl font-semibold text-[#A8BFA4] mt-2">
+              {targetDO.toFixed(2)}
               <span className="text-lg ml-2">mg/L</span>
             </p>
 
@@ -319,20 +347,21 @@ const conditions = plantConditions ?? DEMO_CONDITIONS;
                 setTargetDO(Number(event.target.value));
                 setResult(null);
               }}
-              className="w-full mt-6 accent-[#22e000] cursor-pointer"
+              aria-label="Proposed dissolved oxygen target in milligrams per litre"
+              className="w-full mt-6 accent-[#A8BFA4] cursor-pointer"
             />
 
-            <div className="flex justify-between text-xs text-[#969696] mt-2">
+            <div className="flex justify-between text-xs text-[#A3B5BF] mt-2">
               <span>0.5 mg/L</span>
               <span>4.0 mg/L</span>
             </div>
 
             <div className="mt-5 flex justify-between text-sm">
-              <span className="text-[#969696]">
+              <span className="text-[#A3B5BF]">
                 Setpoint adjustment
               </span>
 
-              <span className="text-[#22e000]">
+              <span className="text-[#A8BFA4]">
                 {targetDO >= conditions.dissolved_oxygen ? "+" : ""}
                 {(targetDO - conditions.dissolved_oxygen).toFixed(2)} mg/L
               </span>
@@ -342,7 +371,7 @@ const conditions = plantConditions ?? DEMO_CONDITIONS;
           <button
             onClick={runSimulation}
             disabled={loading}
-            className="mt-6 w-full rounded-xl bg-[#22e000] text-black font-semibold py-3 flex justify-center items-center gap-2 hover:bg-[#35f510] disabled:opacity-50 transition-colors"
+            className="mt-6 w-full rounded-md bg-[#A8BFA4] text-black font-semibold py-3 flex justify-center items-center gap-2 hover:bg-[#BDD0B7] disabled:opacity-50 transition-colors"
           >
             {loading ? (
               <>
@@ -359,6 +388,31 @@ const conditions = plantConditions ?? DEMO_CONDITIONS;
               </>
             )}
           </button>
+
+          <div className="mt-4 rounded-md border border-[#315566] bg-[#102d3d] p-4">
+  <p className="mb-3 text-xs font-semibold text-[#A8BFA4]">
+    ARDUINO HARDWARE DEMONSTRATION
+  </p>
+
+  <button
+    type="button"
+    onClick={runHardwareDemo}
+    disabled={hardwareBusy}
+    className="w-full rounded-md bg-[#A8BFA4] px-5 py-3 font-semibold text-[#082333] transition hover:bg-[#BDD0B7] disabled:opacity-50"
+  >
+    {hardwareBusy ? "Running Arduino..." : "Run Arduino Demo"}
+  </button>
+
+  {hardwareMessage && (
+    <p className="mt-3 text-sm text-[#A8BFA4]">
+      {hardwareMessage}
+    </p>
+  )}
+
+  <p className="mt-3 text-xs text-neutral-400">
+    Arduino demonstration only. No physical wastewater equipment is controlled.
+  </p>
+</div> 
         </section>
       </div>
 
@@ -384,7 +438,7 @@ const conditions = plantConditions ?? DEMO_CONDITIONS;
 
       {/* Error message */}
       {error && (
-        <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300">
+        <div className="rounded-md border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300">
           {error}
         </div>
       )}
@@ -394,8 +448,8 @@ const conditions = plantConditions ?? DEMO_CONDITIONS;
         <section className="panel p-6">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <p className="text-xs tracking-widest text-[#22e000] mb-2">
-                LIVE SIMULATION RESULT
+              <p className="text-xs tracking-widest text-[#A8BFA4] mb-2">
+                SCENARIO ANALYSIS
               </p>
 
               <h2 className="text-2xl font-medium">
@@ -404,19 +458,19 @@ const conditions = plantConditions ?? DEMO_CONDITIONS;
             </div>
 
             <FlaskConical
-              className="text-[#22e000]"
+              className="text-[#A8BFA4]"
               size={24}
             />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="rounded-xl border border-[#252525] bg-[#080808] p-5">
+            <div className="rounded-md border border-[#29404E] bg-[#0C2230] p-5">
               <Zap
                 size={20}
-                className="text-[#22e000] mb-3"
+                className="text-[#A8BFA4] mb-3"
               />
 
-              <p className="text-sm text-[#969696]">
+              <p className="text-sm text-[#A3B5BF]">
                 Relative aeration demand
               </p>
 
@@ -428,26 +482,26 @@ const conditions = plantConditions ?? DEMO_CONDITIONS;
                 {demandChange?.toFixed(2)}%
               </p>
 
-              <p className="text-xs text-[#969696] mt-2">
+              <p className="text-xs text-[#A3B5BF] mt-2">
                 Oxygen-transfer proxy vs. baseline
               </p>
             </div>
 
-            <div className="rounded-xl border border-[#252525] bg-[#080808] p-5">
+            <div className="rounded-md border border-[#29404E] bg-[#0C2230] p-5">
               <ShieldCheck
                 size={20}
-                className="text-[#22e000] mb-3"
+                className="text-[#A8BFA4] mb-3"
               />
 
-              <p className="text-sm text-[#969696]">
+              <p className="text-sm text-[#A3B5BF]">
                 Operating limits
               </p>
 
               <p
                 className={`text-xl font-semibold mt-2 ${
                   result.within_demo_limits
-                    ? "text-[#22e000]"
-                    : "text-[#ffb454]"
+                    ? "text-[#A8BFA4]"
+                    : "text-[#D8B580]"
                 }`}
               >
                 {result.within_demo_limits
@@ -455,35 +509,35 @@ const conditions = plantConditions ?? DEMO_CONDITIONS;
                   : "Outside demo limits"}
               </p>
 
-              <p className="text-xs text-[#969696] mt-2">
+              <p className="text-xs text-[#A3B5BF] mt-2">
                 Not a plant safety certification
               </p>
             </div>
 
-            <div className="rounded-xl border border-[#252525] bg-[#080808] p-5">
+            <div className="rounded-md border border-[#29404E] bg-[#0C2230] p-5">
               <FlaskConical
                 size={20}
-                className="text-[#ffb454] mb-3"
+                className="text-[#D8B580] mb-3"
               />
 
-              <p className="text-sm text-[#969696]">
+              <p className="text-sm text-[#A3B5BF]">
                 N₂O reduction
               </p>
 
-              <p className="text-xl font-semibold text-[#ffb454] mt-2">
+              <p className="text-xl font-semibold text-[#D8B580] mt-2">
                 {result.n2o_reduction_percent === null
                   ? "Not yet evaluated"
                   : `${result.n2o_reduction_percent}%`}
               </p>
 
-              <p className="text-xs text-[#969696] mt-2">
+              <p className="text-xs text-[#A3B5BF] mt-2">
                 Process-response validation required
               </p>
             </div>
           </div>
 
           {/* Demand comparison */}
-          <div className="mt-6 rounded-xl bg-[#080808] border border-[#252525] p-5">
+          <div className="mt-6 rounded-md bg-[#0C2230] border border-[#29404E] p-5">
             <p className="text-sm font-medium mb-5">
               Oxygen-transfer demand comparison
             </p>
@@ -491,15 +545,15 @@ const conditions = plantConditions ?? DEMO_CONDITIONS;
             <div className="space-y-4">
               <div>
                 <div className="flex justify-between text-sm mb-2">
-                  <span className="text-[#969696]">
+                  <span className="text-[#A3B5BF]">
                     Baseline
                   </span>
                   <span>100%</span>
                 </div>
 
-                <div className="h-3 bg-[#252525] rounded-full overflow-hidden">
+                <div className="h-3 bg-[#29404E] rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-[#969696] rounded-full"
+                    className="h-full bg-[#A3B5BF] rounded-full"
                     style={{
                       width: `${
                         100 /
@@ -515,10 +569,10 @@ const conditions = plantConditions ?? DEMO_CONDITIONS;
 
               <div>
                 <div className="flex justify-between text-sm mb-2">
-                  <span className="text-[#969696]">
+                  <span className="text-[#A3B5BF]">
                     Proposed
                   </span>
-                  <span className="text-[#22e000]">
+                  <span className="text-[#A8BFA4]">
                     {(
                       result.relative_aeration_demand * 100
                     ).toFixed(2)}
@@ -526,9 +580,9 @@ const conditions = plantConditions ?? DEMO_CONDITIONS;
                   </span>
                 </div>
 
-                <div className="h-3 bg-[#252525] rounded-full overflow-hidden">
+                <div className="h-3 bg-[#29404E] rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-[#22e000] rounded-full transition-all duration-500"
+                    className="h-full bg-[#A8BFA4] rounded-full transition-all duration-500"
                     style={{
                       width: `${
                         (result.relative_aeration_demand /
@@ -546,8 +600,8 @@ const conditions = plantConditions ?? DEMO_CONDITIONS;
           </div>
 
           {/* Decision support */}
-          <div className="mt-5 border border-[#22e000]/20 bg-[#22e000]/5 rounded-xl p-5">
-            <p className="text-sm font-medium text-[#22e000] mb-2">
+          <div className="mt-5 border border-[#A8BFA4]/20 bg-[#A8BFA4]/5 rounded-md p-5">
+            <p className="text-sm font-medium text-[#A8BFA4] mb-2">
               Decision support
             </p>
 
@@ -560,7 +614,7 @@ const conditions = plantConditions ?? DEMO_CONDITIONS;
                 {result.violations.map((violation) => (
                   <li
                     key={violation}
-                    className="text-sm text-[#ffb454] flex items-center gap-2"
+                    className="text-sm text-[#D8B580] flex items-center gap-2"
                   >
                     <AlertTriangle size={14} />
                     {violation}
@@ -569,7 +623,7 @@ const conditions = plantConditions ?? DEMO_CONDITIONS;
               </ul>
             )}
 
-            <p className="text-xs text-[#969696] mt-3">
+            <p className="text-xs text-[#A3B5BF] mt-3">
               Effluent quality has not been verified.
               No physical equipment will be controlled.
             </p>
@@ -581,15 +635,15 @@ const conditions = plantConditions ?? DEMO_CONDITIONS;
       <section className="panel p-6">
         <div className="flex flex-wrap justify-between items-center gap-4">
           <div>
-            <p className="text-xs tracking-widest text-[#969696] mb-2">
+            <p className="text-xs tracking-widest text-[#A3B5BF] mb-2">
               03 / SCENARIO EXPLORER
             </p>
 
             <h2 className="text-xl font-medium">
-              Compare alternative strategies
+              Compare operating targets
             </h2>
 
-            <p className="text-sm text-[#969696] mt-2">
+            <p className="text-sm text-[#A3B5BF] mt-2">
               Screen five operating targets against
               configured demonstration constraints.
             </p>
@@ -598,7 +652,7 @@ const conditions = plantConditions ?? DEMO_CONDITIONS;
           <button
             onClick={runOptimization}
             disabled={optimizing || dataLoading || !plantConditions}
-            className="rounded-xl border border-[#22e000]/40 text-[#22e000] px-5 py-3 text-sm font-medium flex items-center gap-2 hover:bg-[#22e000]/10 disabled:opacity-50"
+            className="rounded-md border border-[#A8BFA4]/40 text-[#A8BFA4] px-5 py-3 text-sm font-medium flex items-center gap-2 hover:bg-[#A8BFA4]/10 disabled:opacity-50"
           >
             {optimizing ? (
               <LoaderCircle
@@ -618,7 +672,7 @@ const conditions = plantConditions ?? DEMO_CONDITIONS;
         {optimization && (
           <div className="mt-6 overflow-x-auto">
             <table className="w-full text-sm text-left">
-              <thead className="text-[#969696] border-b border-[#252525]">
+              <thead className="text-[#A3B5BF] border-b border-[#29404E]">
                 <tr>
                   <th className="py-3 pr-4">DO target</th>
                   <th className="py-3 pr-4">
@@ -637,13 +691,13 @@ const conditions = plantConditions ?? DEMO_CONDITIONS;
                 {optimization.scenarios.map((scenario) => (
                   <tr
                     key={scenario.proposed_do}
-                    className="border-b border-[#252525]"
+                    className="border-b border-[#29404E]"
                   >
                     <td className="py-4 pr-4 font-medium">
                       {scenario.proposed_do.toFixed(2)} mg/L
 
                       {scenario.do_change === 0 && (
-                        <span className="text-xs text-[#969696] ml-2">
+                        <span className="text-xs text-[#A3B5BF] ml-2">
                           Baseline
                         </span>
                       )}
@@ -661,18 +715,18 @@ const conditions = plantConditions ?? DEMO_CONDITIONS;
 
                     <td className="py-4 pr-4">
                       {scenario.within_demo_limits ? (
-                        <span className="flex items-center gap-2 text-[#22e000]">
+                        <span className="flex items-center gap-2 text-[#A8BFA4]">
                           <CheckCircle2 size={14} />
                           Pass
                         </span>
                       ) : (
-                        <span className="text-[#ffb454]">
+                        <span className="text-[#D8B580]">
                           Outside limits
                         </span>
                       )}
                     </td>
 
-                    <td className="py-4 text-[#969696]">
+                    <td className="py-4 text-[#A3B5BF]">
                       Not evaluated
                     </td>
                   </tr>
@@ -682,7 +736,7 @@ const conditions = plantConditions ?? DEMO_CONDITIONS;
             </table>
 
             {optimization.eligible_scenarios === 0 && (
-              <div className="mt-5 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4">
+              <div className="mt-5 rounded-md border border-amber-500/30 bg-amber-500/10 p-4">
                 <div className="flex items-start gap-3">
                   <AlertTriangle
                     size={20}
@@ -710,7 +764,7 @@ const conditions = plantConditions ?? DEMO_CONDITIONS;
               </div>
             )}
 
-            <p className="text-xs text-[#969696] mt-4">
+            <p className="text-xs text-[#A3B5BF] mt-4">
               {optimization.message}
             </p>
 
@@ -718,8 +772,8 @@ const conditions = plantConditions ?? DEMO_CONDITIONS;
         )}
       </section>
 
-      <p className="text-xs text-[#969696] pb-4">
-        Research prototype · Illustrative plant inputs ·
+      <p className="text-xs text-[#A3B5BF] pb-4">
+        Research prototype · Historical inputs / demonstration fallback ·
         Simplified oxygen-transfer model · Human review required
       </p>
     </div>

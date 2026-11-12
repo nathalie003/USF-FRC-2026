@@ -23,7 +23,7 @@ export default function MetricCard({
           {title}
         </p>
 
-        <div className="border border-neutral-800 bg-white/[0.03] rounded-lg p-2">
+        <div className="border border-neutral-800 bg-white/[0.03] rounded-md p-2">
           <Icon size={17} className={color} />
         </div>
       </div>

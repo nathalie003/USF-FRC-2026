@@ -5,14 +5,14 @@ import {
   Activity,
   AlertTriangle,
   Waves,
-  CalendarDays,
   BrainCircuit,
 } from "lucide-react";
 
 import MetricCard from "../components/MetricCard";
 import ForecastChart from "../components/ForecastChart";
 import AerationTank from "../components/AerationTank";
-import RiskAlert from "../components/RiskAlert";
+import { Link } from "react-router-dom";
+import "./Overview.css";
 
 import {
   fetchLatestForecast,
@@ -60,7 +60,7 @@ function riskColor(level: ForecastResponse["risk_level"]): string {
     case "watch":
       return "text-amber-400";
     default:
-      return "text-[#22e000]";
+      return "text-[#A8BFA4]";
   }
 }
 
@@ -98,7 +98,7 @@ export default function Overview() {
         setError(
           err instanceof Error
             ? err.message
-            : "Unable to load historical AI data."
+            : "Unable to load historical data."
         );
       } finally {
         if (active) {
@@ -139,250 +139,72 @@ export default function Overview() {
   const currentDO = latestObservation?.dissolved_oxygen;
 
   return (
-    <div className="max-w-[1600px] mx-auto space-y-6">
-      {/* Top bar */}
-      <div className="flex justify-between items-center border-b border-neutral-800 pb-5">
-        <div className="flex items-center gap-2 text-xs">
-          <span className="text-neutral-500">Workspace</span>
-          <span className="text-neutral-700">/</span>
-          <span className="text-neutral-200">Plant overview</span>
+    <div className="engineering-overview" aria-busy={loading}>
+      <header className="corporate-hero">
+        <div className="hero-copy">
+          <p className="corporate-eyebrow">ENGINEERED FOR A MORE SUSTAINABLE WATER CYCLE</p>
+          <h1>Smarter Wastewater Operations. <span>Lower Environmental Impact.</span></h1>
+          <p className="hero-description">N₂O Guardian uses machine learning to forecast nitrous oxide emissions and help engineers examine wastewater treatment decisions.</p>
+          <div className="hero-actions"><Link to="/monitoring" className="corporate-button">Explore Monitoring <span aria-hidden="true">→</span></Link><a href="#technology" className="corporate-button secondary">View Our Technology</a></div>
+          <p className="hero-disclosure">A student research prototype. Lower impact is our objective; emission reductions have not been verified.</p>
         </div>
-
-        <div className="flex items-center gap-3">
-          <span className="hidden sm:flex items-center gap-2 text-xs text-neutral-500">
-            <CalendarDays size={14} />
-            Historical replay
-          </span>
-
-          <span className="flex items-center gap-2 border border-neutral-800 rounded-full px-3 py-1.5 text-[10px] text-neutral-400">
-            <span className="w-1.5 h-1.5 bg-[#22e000] rounded-full" />
-            DEMO MODE
-          </span>
-        </div>
-      </div>
-
-      {/* Heading */}
-      <header className="py-3">
-        <p className="text-[10px] text-[#22e000] tracking-[0.25em] font-semibold mb-3">
-          INTELLIGENT WASTEWATER SYSTEMS
-        </p>
-
-        <h1 className="text-4xl lg:text-5xl font-medium text-white tracking-tight">
-          Plant intelligence.
-        </h1>
-
-        <p className="text-neutral-500 text-sm mt-3">
-          Anticipate emissions. Support operational decisions. Protect the environment.
-        </p>
+        <figure className="hero-image"><img src="/images/blue-plains-wwtp.jpg" alt="An aerial view of treatment basins and infrastructure at Blue Plains wastewater treatment plant" width="1200" height="824" fetchPriority="high" /><figcaption>Blue Plains WWTP, Washington, D.C. · Reference photography, not our research facility</figcaption></figure>
       </header>
-
-      {error && (
-        <div className="rounded-xl border border-red-900/50 bg-red-950/20 p-4 text-sm text-red-300">
-          Unable to load dashboard data: {error}
-        </div>
-      )}
-
-      {/* Metrics */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        <MetricCard
-          title="N₂O emission rate"
-          value={
-            loading
-              ? "Loading..."
-              : currentEmission != null
-                ? currentEmission.toFixed(4)
-                : "Unavailable"
-          }
-          subtitle="Latest historical measurement · units unverified"
-          icon={Activity}
-          color="text-white"
-        />
-
-        <MetricCard
-          title="30-minute forecast"
-          value={
-            loading
-              ? "Loading..."
-              : forecast
-                ? forecast.forecast.toFixed(4)
-                : "Unavailable"
-          }
-          subtitle="XGBoost prediction · reported units"
-          icon={BrainCircuit}
-          color="text-[#22e000]"
-        />
-
-        <MetricCard
-          title="Forecast risk"
-          value={
-            loading
-              ? "Loading..."
-              : forecast
-                ? riskLabel(forecast.risk_level)
-                : "Unavailable"
-          }
-          subtitle="Model-based risk classification"
-          icon={AlertTriangle}
-          color={
-            forecast
-              ? riskColor(forecast.risk_level)
-              : "text-white"
-          }
-        />
-
-        <MetricCard
-          title="Dissolved oxygen"
-          value={
-            loading
-              ? "Loading..."
-              : currentDO != null
-                ? currentDO.toFixed(2)
-                : "Unavailable"
-          }
-          subtitle="Latest historical reading · units unverified"
-          icon={Waves}
-          color="text-white"
-        />
-      </div>
-
-      {/* AI prediction details */}
-      <section className="panel p-6 space-y-5">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <p className="text-[10px] font-semibold tracking-[0.2em] text-[#22e000] mb-2">
-              XGBOOST FORECAST ENGINE
-            </p>
-
-            <h2 className="text-xl font-medium text-white">
-              AI emission forecast
-            </h2>
-
-            <p className="text-xs text-neutral-500 mt-2">
-              Trained on historical wastewater sensor observations.
-            </p>
-          </div>
-
-          <span className="rounded-full border border-neutral-700 px-3 py-1.5 text-xs text-neutral-300">
-            30-minute horizon
-          </span>
-        </div>
-
-        {forecast ? (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="rounded-xl border border-neutral-800 p-4">
-                <p className="text-xs text-neutral-500 mb-2">
-                  Predicted emission rate
-                </p>
-                <p className="text-3xl text-white font-semibold">
-                  {forecast.forecast.toFixed(4)}
-                </p>
-                <p className="text-xs text-neutral-500 mt-2">
-                  Reported units
-                </p>
-              </div>
-
-              <div className="rounded-xl border border-neutral-800 p-4">
-                <p className="text-xs text-neutral-500 mb-2">
-                  Risk classification
-                </p>
-                <p className={`text-2xl font-semibold ${riskColor(forecast.risk_level)}`}>
-                  {riskLabel(forecast.risk_level)}
-                </p>
-                <p className="text-xs text-neutral-500 mt-2">
-                  Watch ≥ {forecast.watch_cutoff.toFixed(4)} ·
-                  High ≥ {forecast.high_risk_cutoff.toFixed(4)}
-                </p>
-              </div>
-
-              <div className="rounded-xl border border-neutral-800 p-4">
-                <p className="text-xs text-neutral-500 mb-2">
-                  Forecast timestamp
-                </p>
-                <p className="text-lg text-white font-medium">
-                  {formatHistoricalTime(forecast.forecast_time)}
-                </p>
-                <p className="text-xs text-neutral-500 mt-2">
-                  Historical demonstration
-                </p>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="text-sm text-white font-medium mb-3">
-                Top contributing sensors
-              </h3>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                {forecast.top_reasons.map((reason) => (
-                  <div
-                    key={reason.sensor}
-                    className="rounded-xl border border-neutral-800 p-4"
-                  >
-                    <p className="text-sm text-white font-medium">
-                      {reason.sensor}
-                    </p>
-
-                    <p
-                      className={`text-xs mt-2 ${
-                        reason.direction === "raises"
-                          ? "text-amber-400"
-                          : "text-[#22e000]"
-                      }`}
-                    >
-                      {reason.direction === "raises"
-                        ? "Raises forecast"
-                        : "Lowers forecast"}
-                    </p>
-
-                    <p className="text-xs text-neutral-500 mt-1">
-                      SHAP contribution: {reason.contribution.toFixed(4)}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <p className="text-xs text-neutral-500">
-              SHAP contributions describe model behavior on a transformed
-              prediction scale. They do not establish causal effects.
-            </p>
-          </>
-        ) : (
-          <p className="text-sm text-neutral-500">
-            {loading
-              ? "Loading historical forecast..."
-              : "Forecast data is unavailable."}
-          </p>
-        )}
+      <div className="project-band"><span>NSBE AI IMPACT-A-THON 2026</span><p>Environmental engineering <span aria-hidden="true">/</span> Historical data <span aria-hidden="true">/</span> Explainable forecasting</p></div>
+      <section className="home-context">
+        <div><p className="corporate-eyebrow">THE CHALLENGE</p><h2>A closer look at what wastewater treatment releases.</h2></div>
+        <div><p>Wastewater treatment protects water quality. Biological nitrogen removal can also release nitrous oxide, a greenhouse gas whose emissions depend on changing process conditions.</p><p>Understanding those patterns is an engineering challenge. Our project brings recorded measurements, short-horizon forecasts and hypothetical aeration scenarios into one place for investigation.</p><Link className="text-link" to="/impact">Understand the environmental context <span aria-hidden="true">→</span></Link></div>
       </section>
-
-      {/* Existing visualizations */}
-      <div className="grid grid-cols-1 xl:grid-cols-[1.3fr_1fr] gap-4">
-        <div className="space-y-2">
-          <ForecastChart
-              data={chartData}
-              forecastValue={forecast?.forecast}
-              forecastTime={forecast?.forecast_time.slice(11, 16)}
-              lastObservedTime={lastObservedTime}
-              />
-          
+      <section className="home-method" aria-labelledby="method-heading">
+        <div className="home-section-title"><div><p className="corporate-eyebrow">OUR APPROACH</p><h2 id="method-heading">From process data to informed review.</h2></div><p>Three connected tools, with a clear distinction between observation, prediction and simulation.</p></div>
+        <div className="method-grid">
+          <article><span className="method-number">01 / OBSERVE</span><h3>Understand the baseline</h3><p>Explore historical dissolved oxygen, nitrogen measurements and N₂O emission records across the dataset.</p><Link to="/monitoring" className="text-link">Explore the records <span aria-hidden="true">→</span></Link></article>
+          <article><span className="method-number">02 / FORECAST</span><h3>Examine emission risk</h3><p>Review the XGBoost 30-minute forecast, risk classification and SHAP feature contributions.</p><a href="#technology" className="text-link">View the technology <span aria-hidden="true">→</span></a></article>
+          <article><span className="method-number">03 / EVALUATE</span><h3>Screen operating scenarios</h3><p>Compare hypothetical aeration settings against demonstration constraints and an oxygen-demand proxy.</p><Link to="/intervention" className="text-link">Visit the Intervention Lab <span aria-hidden="true">→</span></Link></article>
         </div>
-
-        <AerationTank />
+      </section>
+      <section id="technology" className="home-technology" aria-labelledby="technology-heading">
+        <div className="technology-intro"><div><p className="section-code">THE TECHNOLOGY / RESEARCH DEMONSTRATION</p><h2 id="technology-heading">Engineering insight, open to inspection.</h2><p>Explore the underlying observations, forecast output and model explanations.</p></div><span className="technology-status">HISTORICAL REPLAY · NOT LIVE</span></div>
+        <dl className="technology-meta"><div><dt>Data acquisition</dt><dd>Historical dataset · units unverified</dd></div><div><dt>Latest observation</dt><dd>{latestObservation ? formatHistoricalTime(latestObservation.time) : loading ? "Loading…" : "Unavailable"}</dd></div></dl>
+      {error && <div role="alert" className="data-notice">Unable to load dashboard data: {error}</div>}
+      <section aria-label="Historical data instrument strip" className="instrument-strip">
+        <MetricCard title="N₂O emission rate" value={loading ? "Loading…" : currentEmission != null ? currentEmission.toFixed(4) : "Unavailable"} subtitle="Historical measurement · units unverified" icon={Activity} color="text-white" />
+        <MetricCard title="30-minute forecast" value={loading ? "Loading…" : forecast ? forecast.forecast.toFixed(4) : "Unavailable"} subtitle="XGBoost · units unverified" icon={BrainCircuit} color="text-[#A8BFA4]" />
+        <MetricCard title="Forecast risk" value={loading ? "Loading…" : forecast ? riskLabel(forecast.risk_level) : "Unavailable"} subtitle="Demonstration model classification" icon={AlertTriangle} color={forecast ? riskColor(forecast.risk_level) : "text-white"} />
+        <MetricCard title="Dissolved oxygen" value={loading ? "Loading…" : currentDO != null ? currentDO.toFixed(2) : "Unavailable"} subtitle="Historical reading · units unverified" icon={Waves} color="text-white" />
+      </section>
+      <div className="overview-columns">
+        <div className="analysis-column">
+          <ForecastChart data={chartData} forecastValue={forecast?.forecast} forecastTime={forecast?.forecast_time.slice(11, 16)} lastObservedTime={lastObservedTime} />
+          <section className="technical-panel" aria-labelledby="forecast-details">
+            <div className="section-heading"><div><p className="section-code">MODEL OUTPUT / XGBOOST</p><h2 id="forecast-details">30-minute forecast record</h2></div><span>Historical inference</span></div>
+            {forecast ? <>
+              <dl className="forecast-record">
+                <div><dt>Predicted emission rate</dt><dd>{forecast.forecast.toFixed(4)} <small>units unverified</small></dd></div>
+                <div><dt>Risk classification</dt><dd className={riskColor(forecast.risk_level)}>{riskLabel(forecast.risk_level)}</dd></div>
+                <div><dt>Classification thresholds</dt><dd>Watch ≥ {forecast.watch_cutoff.toFixed(4)} · High ≥ {forecast.high_risk_cutoff.toFixed(4)}</dd></div>
+                <div><dt>Forecast timestamp</dt><dd>{formatHistoricalTime(forecast.forecast_time)}</dd></div>
+                <div><dt>Input window</dt><dd>{formatHistoricalTime(forecast.window_start)} – {formatHistoricalTime(forecast.window_end)}</dd></div>
+              </dl>
+              <h3 className="table-heading">SHAP feature contributions</h3>
+              <div className="table-scroll"><table><caption className="sr-only">Top model feature contributions on the transformed prediction scale</caption><thead><tr><th scope="col">Input variable</th><th scope="col">Direction</th><th scope="col" className="numeric">Contribution</th></tr></thead><tbody>
+                {forecast.top_reasons.map(reason => <tr key={reason.sensor}><th scope="row">{reason.sensor}</th><td className={reason.direction === "raises" ? "contribution-raises" : "contribution-lowers"}>{reason.direction === "raises" ? "↑ Raises forecast" : "↓ Lowers forecast"}</td><td className="numeric">{reason.contribution > 0 ? "+" : ""}{reason.contribution.toFixed(4)}</td></tr>)}
+              </tbody></table></div>
+              <p className="technical-note">SHAP values use the model’s transformed prediction scale. Contributions are not causal effects or intervention outcomes.</p>
+            </> : <p className="technical-note" role="status">{loading ? "Loading historical forecast…" : "Forecast data is unavailable."}</p>}
+          </section>
+        </div>
+        <div className="equipment-column">
+          <section className="technical-panel basin-reference">
+            <div className="section-heading"><div><p className="section-code">PROCESS REFERENCE</p><h2>Biological treatment / aeration</h2></div></div>
+            <figure><img src="/images/dresden-aeration-basin.jpg" alt="Aeration basin at Dresden Kaditz wastewater treatment plant" width="800" height="600" loading="lazy" /><figcaption>Dresden Kaditz · reference basin, not monitored equipment</figcaption></figure>
+          </section>
+          <AerationTank title="Aeration basin schematic" subtitle="Demonstration only · virtual equipment and readings" />
+          <section className="scenario-link"><p className="section-code">ENGINEERING REVIEW</p><h2>Operating scenarios</h2><p>Compare hypothetical aeration settings. N₂O reduction effects are unvalidated; no physical equipment is controlled.</p><Link to="/intervention">Open intervention lab <span aria-hidden="true">→</span></Link></section>
+        </div>
       </div>
-
-      <RiskAlert />
-
-      <footer className="flex flex-wrap items-center justify-between gap-2 border-t border-neutral-800 pt-4 pb-2">
-        <p className="text-[10px] text-neutral-600">
-          N₂O Guardian © 2026 · NSBE AI Impact-A-Thon
-        </p>
-
-        <p className="text-[10px] text-neutral-600">
-          Historical AI demonstration · Not for operational plant control
-        </p>
-      </footer>
+      </section>
+      <section className="home-closing"><div><p className="corporate-eyebrow">BUILT FOR INVESTIGATION</p><h2>A practical starting point for engineering questions.</h2><p>See what the prototype implements, what the data can support and where further validation is needed.</p></div><Link to="/impact" className="corporate-button">Project scope &amp; evidence <span aria-hidden="true">→</span></Link></section>
     </div>
   );
 }
